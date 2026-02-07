@@ -6,4 +6,5 @@ Architex is a web application that allows users (students or interview candidate
 
 - better-sqlite3 API docs (https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md)
 - express API docs (https://expressjs.com/en/5x/api.html)
-- cors API docs (https://github.com/expressjs/cors#readme)
+- cors docs (https://github.com/expressjs/cors#readme)
+- Excalidraw integration docs (https://docs.excalidraw.com/docs/@excalidraw/excalidraw/integration)
