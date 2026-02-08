@@ -51,6 +51,11 @@ const Dashboard = () => {
                 <h1>Dashboard</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span>Welcome, {user?.username}</span>
+                    {user?.role === 'ADMIN' && (
+                        <Button variant="outline" onClick={() => navigate('/admin/scenarios')}>
+                            Manage Scenarios
+                        </Button>
+                    )}
                     <Button variant="outline" onClick={handleLogout}>Logout</Button>
                 </div>
             </div>
