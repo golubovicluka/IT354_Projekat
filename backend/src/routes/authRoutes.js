@@ -14,8 +14,29 @@ router.post('/register', (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const user = createUser(username, email, password, role);
-        res.status(201).json({ message: 'User created successfully', user: { id: user.id, username: user.username, role: user.role } });
+        if (username.length < 3 || username.length > 30) {
+            return res.status(400).json({ error: 'Username must be between 3 and 30 characters' });
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            return res.status(400).json({ error: 'Username can only contain letters, numbers, and underscores' });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        const userRole = role === 'ADMIN' ? 'USER' : (role || 'USER');
+
+        const user = createUser(username, email, password, userRole);
+        res.status(201).json({
+            message: 'User created successfully',
+            user: { id: user.id, username: user.username, email: user.email, role: user.role }
+        });
     } catch (error) {
         if (error.message === 'Username or email already exists') {
             return res.status(409).json({ error: error.message });
