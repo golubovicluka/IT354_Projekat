@@ -28,6 +28,11 @@ export const AuthProvider = ({ children }) => {
         return userData;
     };
 
+    const register = async (username, email, password) => {
+        const response = await api.post('/auth/register', { username, email, password });
+        return response.data;
+    };
+
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -38,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     const isAuthenticated = !!token && !!user;
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, loading }}>
+        <AuthContext.Provider value={{ user, token, login, register, logout, isAuthenticated, loading }}>
             {children}
         </AuthContext.Provider>
     );
