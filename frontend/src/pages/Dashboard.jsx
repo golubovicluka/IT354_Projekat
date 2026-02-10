@@ -32,12 +32,16 @@ const Dashboard = () => {
         navigate('/login');
     };
 
-    const getDifficultyColor = (difficulty) => {
+    const getDifficultyClassName = (difficulty) => {
         switch (difficulty) {
-            case 'EASY': return 'bg-green-500';
-            case 'MEDIUM': return 'bg-yellow-500';
-            case 'HARD': return 'bg-red-500';
-            default: return 'bg-gray-500';
+            case 'EASY':
+                return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300';
+            case 'MEDIUM':
+                return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
+            case 'HARD':
+                return 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300';
+            default:
+                return '';
         }
     };
 
@@ -69,7 +73,7 @@ const Dashboard = () => {
                         <CardHeader>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                 <CardTitle>{scenario.title}</CardTitle>
-                                <Badge className={getDifficultyColor(scenario.difficulty)}>
+                                <Badge className={getDifficultyClassName(scenario.difficulty)}>
                                     {scenario.difficulty}
                                 </Badge>
                             </div>

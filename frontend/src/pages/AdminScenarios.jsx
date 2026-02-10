@@ -31,10 +31,10 @@ const INITIAL_FORM = {
   constraints: '',
 };
 
-const difficultyColor = {
-  EASY: 'bg-green-500 text-white',
-  MEDIUM: 'bg-yellow-500 text-black',
-  HARD: 'bg-red-500 text-white',
+const difficultyBadgeClassName = {
+  EASY: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
+  MEDIUM: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+  HARD: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
 };
 
 const prettyConstraints = (constraints) => {
@@ -356,7 +356,7 @@ const AdminScenarios = () => {
                         {scenario.description}
                       </p>
                     </div>
-                    <Badge className={difficultyColor[scenario.difficulty] || ''}>
+                    <Badge className={difficultyBadgeClassName[scenario.difficulty] || ''}>
                       {scenario.difficulty}
                     </Badge>
                   </div>
