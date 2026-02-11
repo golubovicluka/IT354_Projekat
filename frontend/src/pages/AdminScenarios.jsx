@@ -305,7 +305,7 @@ const AdminScenarios = () => {
         <div>
           <h1 className="text-2xl font-semibold">Admin Scenarios</h1>
           <p className="text-muted-foreground text-sm">
-            Manage system design scenarios as {user?.username}.
+            Manage system design scenarios.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

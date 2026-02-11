@@ -8,23 +8,59 @@ import api from '@/lib/api';
 
 const Dashboard = () => {
     const [scenarios, setScenarios] = useState([]);
+    const [designsByScenarioId, setDesignsByScenarioId] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [designsError, setDesignsError] = useState('');
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchScenarios = async () => {
+        const fetchDashboardData = async () => {
             try {
-                const response = await api.get('/scenarios');
-                setScenarios(response.data);
+                const [scenariosResult, designsResult] = await Promise.allSettled([
+                    api.get('/scenarios'),
+                    api.get('/designs'),
+                ]);
+
+                if (scenariosResult.status === 'fulfilled') {
+                    setScenarios(scenariosResult.value.data || []);
+                    setError('');
+                } else {
+                    setError('Failed to load scenarios');
+                    setScenarios([]);
+                }
+
+                if (designsResult.status === 'fulfilled') {
+                    const latestDesignByScenario = {};
+                    const designs = Array.isArray(designsResult.value.data) ? designsResult.value.data : [];
+
+                    for (const design of designs) {
+                        if (!design?.scenario_id) {
+                            continue;
+                        }
+
+                        if (!latestDesignByScenario[design.scenario_id]) {
+                            latestDesignByScenario[design.scenario_id] = design;
+                        }
+                    }
+
+                    setDesignsByScenarioId(latestDesignByScenario);
+                    setDesignsError('');
+                } else {
+                    setDesignsByScenarioId({});
+                    setDesignsError('Could not load your design statuses. You can still start new designs.');
+                }
             } catch {
                 setError('Failed to load scenarios');
+                setScenarios([]);
+                setDesignsByScenarioId({});
             } finally {
                 setLoading(false);
             }
         };
-        fetchScenarios();
+
+        fetchDashboardData();
     }, []);
 
     const handleLogout = () => {
@@ -40,6 +76,19 @@ const Dashboard = () => {
                 return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
             case 'HARD':
                 return 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300';
+            default:
+                return '';
+        }
+    };
+
+    const getDesignStatusClassName = (status) => {
+        switch (status) {
+            case 'DRAFT':
+                return 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300';
+            case 'SUBMITTED':
+                return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
+            case 'GRADED':
+                return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300';
             default:
                 return '';
         }
@@ -93,10 +142,21 @@ const Dashboard = () => {
             </div>
 
             {error && <p style={{ color: 'red' }}>{error}</p>}
+            {designsError && !error && <p style={{ color: '#b45309' }}>{designsError}</p>}
 
             <h2 style={{ marginBottom: '15px' }}>Available Scenarios</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
                 {scenarios.map((scenario) => {
+                    const existingDesign = designsByScenarioId[scenario.id] || null;
+                    const existingStatus = existingDesign?.status || null;
+                    const isDraft = existingStatus === 'DRAFT';
+                    const isSubmitted = existingStatus === 'SUBMITTED' || existingStatus === 'GRADED';
+                    const actionLabel = isDraft
+                        ? 'Continue Draft'
+                        : isSubmitted
+                            ? 'Submitted'
+                            : 'Start Design';
+
                     const functionalRequirements = parseJsonArray(scenario.functional_requirements);
                     const capacityEstimations = parseJsonObject(
                         scenario.capacity_estimations || scenario.constraints
@@ -113,9 +173,16 @@ const Dashboard = () => {
                             <CardHeader>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                     <CardTitle>{scenario.title}</CardTitle>
-                                    <Badge className={getDifficultyClassName(scenario.difficulty)}>
-                                        {scenario.difficulty}
-                                    </Badge>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <Badge className={getDifficultyClassName(scenario.difficulty)}>
+                                            {scenario.difficulty}
+                                        </Badge>
+                                        {existingStatus && (
+                                            <Badge className={getDesignStatusClassName(existingStatus)}>
+                                                {existingStatus}
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                                 <CardDescription>{scenario.description}</CardDescription>
                             </CardHeader>
@@ -135,8 +202,9 @@ const Dashboard = () => {
                                 <Button
                                     style={{ marginTop: '10px' }}
                                     onClick={() => navigate(`/workspace/${scenario.id}`)}
+                                    disabled={isSubmitted}
                                 >
-                                    Start Design
+                                    {actionLabel}
                                 </Button>
                             </CardContent>
                         </Card>
