@@ -20,7 +20,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute disallowAdmin>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -28,7 +28,7 @@ function App() {
           <Route
             path="/workspace/:scenarioId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute disallowAdmin>
                 <Workspace />
               </ProtectedRoute>
             }

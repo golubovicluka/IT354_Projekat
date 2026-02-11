@@ -139,7 +139,7 @@ const AdminScenarios = () => {
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const isEditing = editingId !== null;
@@ -309,8 +309,8 @@ const AdminScenarios = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
+          <Button variant="outline" onClick={() => navigate('/admin/review')}>
+            Back to Review
           </Button>
           <Button variant="outline" onClick={handleLogout}>
             Logout
