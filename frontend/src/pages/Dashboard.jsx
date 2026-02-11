@@ -34,8 +34,11 @@ const Dashboard = () => {
                 if (designsResult.status === 'fulfilled') {
                     const latestDesignByScenario = {};
                     const designs = Array.isArray(designsResult.value.data) ? designsResult.value.data : [];
+                    const userScopedDesigns = user?.id
+                        ? designs.filter((design) => design.user_id === user.id)
+                        : designs;
 
-                    for (const design of designs) {
+                    for (const design of userScopedDesigns) {
                         if (!design?.scenario_id) {
                             continue;
                         }
@@ -61,7 +64,7 @@ const Dashboard = () => {
         };
 
         fetchDashboardData();
-    }, []);
+    }, [user?.id]);
 
     const handleLogout = () => {
         logout();
@@ -133,9 +136,14 @@ const Dashboard = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span>Welcome, {user?.username}</span>
                     {user?.role === 'ADMIN' && (
-                        <Button variant="outline" onClick={() => navigate('/admin/scenarios')}>
-                            Manage Scenarios
-                        </Button>
+                        <>
+                            <Button variant="outline" onClick={() => navigate('/admin/reviews')}>
+                                Review Submissions
+                            </Button>
+                            <Button variant="outline" onClick={() => navigate('/admin/scenarios')}>
+                                Manage Scenarios
+                            </Button>
+                        </>
                     )}
                     <Button variant="outline" onClick={handleLogout}>Logout</Button>
                 </div>
@@ -150,11 +158,14 @@ const Dashboard = () => {
                     const existingDesign = designsByScenarioId[scenario.id] || null;
                     const existingStatus = existingDesign?.status || null;
                     const isDraft = existingStatus === 'DRAFT';
-                    const isSubmitted = existingStatus === 'SUBMITTED' || existingStatus === 'GRADED';
+                    const isSubmitted = existingStatus === 'SUBMITTED';
+                    const isGraded = existingStatus === 'GRADED';
                     const actionLabel = isDraft
                         ? 'Continue Draft'
-                        : isSubmitted
-                            ? 'Submitted'
+                        : isGraded
+                            ? 'View Feedback'
+                            : isSubmitted
+                                ? 'Submitted'
                             : 'Start Design';
 
                     const functionalRequirements = parseJsonArray(scenario.functional_requirements);
@@ -201,8 +212,15 @@ const Dashboard = () => {
 
                                 <Button
                                     style={{ marginTop: '10px' }}
-                                    onClick={() => navigate(`/workspace/${scenario.id}`)}
-                                    disabled={isSubmitted}
+                                    onClick={() => {
+                                        if (isGraded && existingDesign?.id) {
+                                            navigate(`/feedback/${existingDesign.id}`);
+                                            return;
+                                        }
+
+                                        navigate(`/workspace/${scenario.id}`);
+                                    }}
+                                    disabled={isSubmitted || (isGraded && !existingDesign?.id)}
                                 >
                                     {actionLabel}
                                 </Button>
