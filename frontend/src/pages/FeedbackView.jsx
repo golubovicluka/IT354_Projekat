@@ -79,7 +79,7 @@ const statusBadgeClassName = {
 const FeedbackView = () => {
   const { designId } = useParams();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [design, setDesign] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,6 +95,14 @@ const FeedbackView = () => {
     let cancelled = false;
 
     const loadFeedback = async () => {
+      if (user?.role === 'ADMIN') {
+        const adminTarget = parsedDesignId
+          ? `/admin/review/${parsedDesignId}`
+          : '/admin/review';
+        navigate(adminTarget, { replace: true });
+        return;
+      }
+
       if (!parsedDesignId) {
         setError('Invalid design id.');
         setLoading(false);
@@ -139,7 +147,7 @@ const FeedbackView = () => {
     return () => {
       cancelled = true;
     };
-  }, [parsedDesignId]);
+  }, [navigate, parsedDesignId, user?.role]);
 
   const handleLogout = () => {
     logout();

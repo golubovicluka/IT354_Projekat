@@ -137,8 +137,8 @@ const Dashboard = () => {
                     <span>Welcome, {user?.username}</span>
                     {user?.role === 'ADMIN' && (
                         <>
-                            <Button variant="outline" onClick={() => navigate('/admin/reviews')}>
-                                Review Submissions
+                            <Button variant="outline" onClick={() => navigate('/admin/review')}>
+                                Review Designs
                             </Button>
                             <Button variant="outline" onClick={() => navigate('/admin/scenarios')}>
                                 Manage Scenarios

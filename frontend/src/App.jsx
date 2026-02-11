@@ -5,7 +5,6 @@ import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import AdminScenarios from "./pages/AdminScenarios.jsx";
 import Workspace from "./pages/Workspace.jsx";
-import AdminReviews from "./pages/AdminReviews.jsx";
 import AdminReview from "./pages/AdminReview.jsx";
 import FeedbackView from "./pages/FeedbackView.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -46,7 +45,15 @@ function App() {
             path="/admin/reviews"
             element={
               <ProtectedRoute requireAdmin>
-                <AdminReviews />
+                <Navigate to="/admin/review" replace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/review"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminReview />
               </ProtectedRoute>
             }
           />
