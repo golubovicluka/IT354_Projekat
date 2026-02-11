@@ -14,6 +14,30 @@ const getDraftByUserAndScenario = (userId, scenarioId) => {
     ).get(userId, scenarioId);
 };
 
+const getDesignsByUser = (userId, status = null) => {
+    if (status) {
+        return db.prepare(
+            `SELECT d.*,
+                    s.title AS scenario_title,
+                    s.difficulty AS scenario_difficulty
+             FROM designs d
+             INNER JOIN scenarios s ON s.id = d.scenario_id
+             WHERE d.user_id = ? AND d.status = ?
+             ORDER BY d.id DESC`
+        ).all(userId, status);
+    }
+
+    return db.prepare(
+        `SELECT d.*,
+                s.title AS scenario_title,
+                s.difficulty AS scenario_difficulty
+         FROM designs d
+         INNER JOIN scenarios s ON s.id = d.scenario_id
+         WHERE d.user_id = ?
+         ORDER BY d.id DESC`
+    ).all(userId);
+};
+
 const createDesign = (userId, scenarioId, diagramData, textExplanation = '') => {
     const result = db.prepare(
         `INSERT INTO designs (user_id, scenario_id, diagram_data, text_explanation)
@@ -65,6 +89,7 @@ const upsertDraftDesign = (userId, scenarioId, diagramData, textExplanation = ''
 
 export {
     getDesignById,
+    getDesignsByUser,
     getDraftByUserAndScenario,
     createDesign,
     updateDraftDesign,

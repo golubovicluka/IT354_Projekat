@@ -3,6 +3,7 @@ import { verifyToken } from '../middleware/authMiddleware.js';
 import { getScenarioById } from '../models/scenarioModel.js';
 import {
     getDesignById,
+    getDesignsByUser,
     getDraftByUserAndScenario,
     submitDraftDesign,
     updateDraftDesign,
@@ -10,6 +11,7 @@ import {
 } from '../models/designModel.js';
 
 const router = express.Router();
+const ALLOWED_DESIGN_STATUSES = new Set(['DRAFT', 'SUBMITTED', 'GRADED']);
 
 const parsePositiveInt = (value) => {
     const parsed = Number.parseInt(value, 10);
@@ -28,6 +30,25 @@ const isValidDiagramData = (diagramData) => {
         return false;
     }
 };
+
+router.get('/', verifyToken, (req, res) => {
+    try {
+        const rawStatus = typeof req.query?.status === 'string'
+            ? req.query.status.trim().toUpperCase()
+            : '';
+        const status = rawStatus || null;
+
+        if (status && !ALLOWED_DESIGN_STATUSES.has(status)) {
+            return res.status(400).json({ error: 'Invalid status. Allowed values: DRAFT, SUBMITTED, GRADED.' });
+        }
+
+        const designs = getDesignsByUser(req.user.id, status);
+        return res.json(designs);
+    } catch (error) {
+        console.error('Get Designs Error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 router.get('/scenario/:scenarioId/draft', verifyToken, (req, res) => {
     try {
