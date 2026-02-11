@@ -4,6 +4,7 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import AdminScenarios from "./pages/AdminScenarios.jsx";
+import Workspace from "./pages/Workspace.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -19,6 +20,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspace/:scenarioId"
+            element={
+              <ProtectedRoute>
+                <Workspace />
               </ProtectedRoute>
             }
           />

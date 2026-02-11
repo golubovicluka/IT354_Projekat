@@ -18,7 +18,7 @@ const Dashboard = () => {
             try {
                 const response = await api.get('/scenarios');
                 setScenarios(response.data);
-            } catch (err) {
+            } catch {
                 setError('Failed to load scenarios');
             } finally {
                 setLoading(false);
@@ -85,7 +85,12 @@ const Dashboard = () => {
                                     <strong>Constraints:</strong> {scenario.constraints}
                                 </p>
                             )}
-                            <Button style={{ marginTop: '10px' }}>Start Design</Button>
+                            <Button
+                                style={{ marginTop: '10px' }}
+                                onClick={() => navigate(`/workspace/${scenario.id}`)}
+                            >
+                                Start Design
+                            </Button>
                         </CardContent>
                     </Card>
                 ))}
