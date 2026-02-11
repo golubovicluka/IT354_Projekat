@@ -5,6 +5,7 @@ import { initDb } from './src/database.js';
 import seed from './src/seed.js';
 import authRoutes from './src/routes/authRoutes.js';
 import scenarioRoutes from './src/routes/scenarioRoutes.js';
+import designRoutes from './src/routes/designRoutes.js';
 
 const app = express();
 const PORT = 3000;
@@ -20,10 +21,7 @@ seed();
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/scenarios', scenarioRoutes);
-
-app.get("/", (req, res) => {
-    res.send("Test endpoint");
-});
+app.use('/api/designs', designRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);

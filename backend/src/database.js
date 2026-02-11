@@ -49,19 +49,6 @@ function initDb() {
         `).run();
 
         db.prepare(`
-            CREATE TABLE IF NOT EXISTS capacity_plans (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                design_id INTEGER NOT NULL,
-                total_users INTEGER,
-                daily_active_users INTEGER,
-                storage_per_user_kb INTEGER,
-                calculated_storage_tb REAL,
-                calculated_servers_needed INTEGER,
-                FOREIGN KEY (design_id) REFERENCES designs(id)
-            )
-        `).run();
-
-        db.prepare(`
             CREATE TABLE IF NOT EXISTS feedback (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 design_id INTEGER NOT NULL,
