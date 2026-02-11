@@ -4,6 +4,34 @@ const getDesignById = (id) => {
     return db.prepare('SELECT * FROM designs WHERE id = ?').get(id);
 };
 
+const getDesignDetailsById = (id) => {
+    return db.prepare(
+        `SELECT d.*,
+                u.username AS user_username,
+                u.email AS user_email,
+                s.title AS scenario_title,
+                s.description AS scenario_description,
+                s.functional_requirements AS scenario_functional_requirements,
+                s.non_functional_requirements AS scenario_non_functional_requirements,
+                s.capacity_estimations AS scenario_capacity_estimations,
+                s.difficulty AS scenario_difficulty
+         FROM designs d
+         INNER JOIN users u ON u.id = d.user_id
+         INNER JOIN scenarios s ON s.id = d.scenario_id
+         WHERE d.id = ?`
+    ).get(id);
+};
+
+const getDesignListSelect = `
+    SELECT d.*,
+           s.title AS scenario_title,
+           s.difficulty AS scenario_difficulty,
+           u.username AS user_username
+    FROM designs d
+    INNER JOIN scenarios s ON s.id = d.scenario_id
+    INNER JOIN users u ON u.id = d.user_id
+`;
+
 const getDraftByUserAndScenario = (userId, scenarioId) => {
     return db.prepare(
         `SELECT *
@@ -17,25 +45,32 @@ const getDraftByUserAndScenario = (userId, scenarioId) => {
 const getDesignsByUser = (userId, status = null) => {
     if (status) {
         return db.prepare(
-            `SELECT d.*,
-                    s.title AS scenario_title,
-                    s.difficulty AS scenario_difficulty
-             FROM designs d
-             INNER JOIN scenarios s ON s.id = d.scenario_id
+            `${getDesignListSelect}
              WHERE d.user_id = ? AND d.status = ?
              ORDER BY d.id DESC`
         ).all(userId, status);
     }
 
     return db.prepare(
-        `SELECT d.*,
-                s.title AS scenario_title,
-                s.difficulty AS scenario_difficulty
-         FROM designs d
-         INNER JOIN scenarios s ON s.id = d.scenario_id
+        `${getDesignListSelect}
          WHERE d.user_id = ?
          ORDER BY d.id DESC`
     ).all(userId);
+};
+
+const getDesignsForAdmin = (status = null) => {
+    if (status) {
+        return db.prepare(
+            `${getDesignListSelect}
+             WHERE d.status = ?
+             ORDER BY d.id DESC`
+        ).all(status);
+    }
+
+    return db.prepare(
+        `${getDesignListSelect}
+         ORDER BY d.id DESC`
+    ).all();
 };
 
 const createDesign = (userId, scenarioId, diagramData, textExplanation = '') => {
@@ -75,6 +110,16 @@ const submitDraftDesign = (id, userId) => {
     return getDesignById(id);
 };
 
+const markDesignAsGraded = (id) => {
+    db.prepare(
+        `UPDATE designs
+         SET status = 'GRADED'
+         WHERE id = ?`
+    ).run(id);
+
+    return getDesignById(id);
+};
+
 const upsertDraftDesign = (userId, scenarioId, diagramData, textExplanation = '') => {
     const existingDraft = getDraftByUserAndScenario(userId, scenarioId);
 
@@ -89,10 +134,13 @@ const upsertDraftDesign = (userId, scenarioId, diagramData, textExplanation = ''
 
 export {
     getDesignById,
+    getDesignDetailsById,
     getDesignsByUser,
+    getDesignsForAdmin,
     getDraftByUserAndScenario,
     createDesign,
     updateDraftDesign,
     submitDraftDesign,
+    markDesignAsGraded,
     upsertDraftDesign,
 };

@@ -66,6 +66,7 @@ function initDb() {
 
     creatingTables();
     ensureScenariosSchema();
+    ensureFeedbackSchema();
 }
 
 function ensureScenariosSchema() {
@@ -86,6 +87,12 @@ function ensureScenariosSchema() {
     addColumnIfMissing('functional_requirements', 'TEXT');
     addColumnIfMissing('non_functional_requirements', 'TEXT');
     addColumnIfMissing('capacity_estimations', 'TEXT');
+}
+
+function ensureFeedbackSchema() {
+    db.prepare(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_feedback_design_id_unique ON feedback(design_id)'
+    ).run();
 }
 
 export { db, initDb };

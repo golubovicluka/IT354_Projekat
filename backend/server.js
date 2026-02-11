@@ -6,6 +6,7 @@ import seed from './src/seed.js';
 import authRoutes from './src/routes/authRoutes.js';
 import scenarioRoutes from './src/routes/scenarioRoutes.js';
 import designRoutes from './src/routes/designRoutes.js';
+import feedbackRoutes from './src/routes/feedbackRoutes.js';
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +23,7 @@ seed();
 app.use('/api/auth', authRoutes);
 app.use('/api/scenarios', scenarioRoutes);
 app.use('/api/designs', designRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);

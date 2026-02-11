@@ -3,6 +3,8 @@ import { verifyToken } from '../middleware/authMiddleware.js';
 import { getScenarioById } from '../models/scenarioModel.js';
 import {
     getDesignById,
+    getDesignDetailsById,
+    getDesignsForAdmin,
     getDesignsByUser,
     getDraftByUserAndScenario,
     submitDraftDesign,
@@ -42,10 +44,36 @@ router.get('/', verifyToken, (req, res) => {
             return res.status(400).json({ error: 'Invalid status. Allowed values: DRAFT, SUBMITTED, GRADED.' });
         }
 
-        const designs = getDesignsByUser(req.user.id, status);
+        const designs = req.user.role === 'ADMIN'
+            ? getDesignsForAdmin(status)
+            : getDesignsByUser(req.user.id, status);
         return res.json(designs);
     } catch (error) {
         console.error('Get Designs Error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/:id', verifyToken, (req, res) => {
+    try {
+        const designId = parsePositiveInt(req.params.id);
+        if (!designId) {
+            return res.status(400).json({ error: 'Invalid design id.' });
+        }
+
+        const design = getDesignDetailsById(designId);
+        if (!design) {
+            return res.status(404).json({ error: 'Design not found.' });
+        }
+
+        const isAdmin = req.user.role === 'ADMIN';
+        if (!isAdmin && design.user_id !== req.user.id) {
+            return res.status(403).json({ error: 'Access denied.' });
+        }
+
+        return res.json(design);
+    } catch (error) {
+        console.error('Get Design Error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
