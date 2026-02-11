@@ -45,6 +45,34 @@ const Dashboard = () => {
         }
     };
 
+    const parseJsonArray = (value) => {
+        if (!value || typeof value !== 'string') {
+            return [];
+        }
+
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    };
+
+    const parseJsonObject = (value) => {
+        if (!value || typeof value !== 'string') {
+            return null;
+        }
+
+        try {
+            const parsed = JSON.parse(value);
+            return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
+                ? parsed
+                : null;
+        } catch {
+            return null;
+        }
+    };
+
     if (loading) {
         return <div style={{ padding: '20px', textAlign: 'center' }}>Loading scenarios...</div>;
     }
@@ -68,32 +96,52 @@ const Dashboard = () => {
 
             <h2 style={{ marginBottom: '15px' }}>Available Scenarios</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-                {scenarios.map((scenario) => (
-                    <Card key={scenario.id}>
-                        <CardHeader>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                <CardTitle>{scenario.title}</CardTitle>
-                                <Badge className={getDifficultyClassName(scenario.difficulty)}>
-                                    {scenario.difficulty}
-                                </Badge>
-                            </div>
-                            <CardDescription>{scenario.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {scenario.constraints && (
-                                <p style={{ fontSize: '14px', color: '#666', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-                                    <strong>Constraints:</strong> {scenario.constraints}
-                                </p>
-                            )}
-                            <Button
-                                style={{ marginTop: '10px' }}
-                                onClick={() => navigate(`/workspace/${scenario.id}`)}
-                            >
-                                Start Design
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ))}
+                {scenarios.map((scenario) => {
+                    const functionalRequirements = parseJsonArray(scenario.functional_requirements);
+                    const capacityEstimations = parseJsonObject(
+                        scenario.capacity_estimations || scenario.constraints
+                    );
+                    const capacitySummary = capacityEstimations
+                        ? Object.entries(capacityEstimations)
+                              .slice(0, 3)
+                              .map(([key, value]) => `${key}: ${value}`)
+                              .join(' | ')
+                        : '';
+
+                    return (
+                        <Card key={scenario.id}>
+                            <CardHeader>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                    <CardTitle>{scenario.title}</CardTitle>
+                                    <Badge className={getDifficultyClassName(scenario.difficulty)}>
+                                        {scenario.difficulty}
+                                    </Badge>
+                                </div>
+                                <CardDescription>{scenario.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {functionalRequirements.length > 0 && (
+                                    <p style={{ fontSize: '14px', color: '#666', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                                        <strong>Functional:</strong> {functionalRequirements.slice(0, 2).join(', ')}
+                                    </p>
+                                )}
+
+                                {capacitySummary && (
+                                    <p style={{ marginTop: '6px', fontSize: '14px', color: '#666', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                                        <strong>Capacity:</strong> {capacitySummary}
+                                    </p>
+                                )}
+
+                                <Button
+                                    style={{ marginTop: '10px' }}
+                                    onClick={() => navigate(`/workspace/${scenario.id}`)}
+                                >
+                                    Start Design
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
             </div>
 
             {scenarios.length === 0 && !error && (

@@ -28,7 +28,9 @@ const INITIAL_FORM = {
   title: '',
   description: '',
   difficulty: 'EASY',
-  constraints: '',
+  functionalRequirements: '',
+  nonFunctionalRequirements: '',
+  capacityEstimations: '',
 };
 
 const difficultyBadgeClassName = {
@@ -37,29 +39,94 @@ const difficultyBadgeClassName = {
   HARD: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
 };
 
-const prettyConstraints = (constraints) => {
-  if (!constraints) {
-    return 'No constraints provided.';
+const prettyJson = (value, emptyMessage) => {
+  if (!value) {
+    return emptyMessage;
   }
 
   try {
-    return JSON.stringify(JSON.parse(constraints), null, 2);
+    return JSON.stringify(JSON.parse(value), null, 2);
   } catch {
-    return constraints;
+    return value;
   }
 };
 
-const normalizeConstraints = (constraintsInput) => {
-  const trimmed = constraintsInput.trim();
-  if (!trimmed) {
+const formatJsonForInput = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  return prettyJson(value, '');
+};
+
+const formatArrayForInput = (value) => {
+  if (!value) {
     return '';
   }
 
   try {
-    return JSON.stringify(JSON.parse(trimmed));
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed.map((item) => String(item)).join('\n');
+    }
   } catch {
-    throw new Error('Constraints must be valid JSON.');
+    return String(value);
   }
+
+  return '';
+};
+
+const normalizeJsonInput = (value, expectedType, fieldLabel) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (expectedType === 'array') {
+    if (trimmed.startsWith('[')) {
+      let parsed;
+
+      try {
+        parsed = JSON.parse(trimmed);
+      } catch {
+        throw new Error(`${fieldLabel} must be valid JSON.`);
+      }
+
+      if (!Array.isArray(parsed)) {
+        throw new Error(`${fieldLabel} must be a JSON array.`);
+      }
+
+      return JSON.stringify(parsed);
+    }
+
+    const lines = trimmed
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    return JSON.stringify(lines);
+  }
+
+  let parsed;
+
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    throw new Error(`${fieldLabel} must be valid JSON.`);
+  }
+
+  if (expectedType === 'array' && !Array.isArray(parsed)) {
+    throw new Error(`${fieldLabel} must be a JSON array.`);
+  }
+
+  if (
+    expectedType === 'object' &&
+    (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed))
+  ) {
+    throw new Error(`${fieldLabel} must be a JSON object.`);
+  }
+
+  return JSON.stringify(parsed);
 };
 
 const AdminScenarios = () => {
@@ -118,7 +185,11 @@ const AdminScenarios = () => {
       title: scenario.title || '',
       description: scenario.description || '',
       difficulty: scenario.difficulty || 'EASY',
-      constraints: prettyConstraints(scenario.constraints),
+      functionalRequirements: formatArrayForInput(scenario.functional_requirements),
+      nonFunctionalRequirements: formatArrayForInput(scenario.non_functional_requirements),
+      capacityEstimations: formatJsonForInput(
+        scenario.capacity_estimations || scenario.constraints
+      ),
     });
   };
 
@@ -140,7 +211,21 @@ const AdminScenarios = () => {
         title: form.title.trim(),
         description: form.description.trim(),
         difficulty: form.difficulty,
-        constraints: normalizeConstraints(form.constraints),
+        functionalRequirements: normalizeJsonInput(
+          form.functionalRequirements,
+          'array',
+          'Functional requirements'
+        ),
+        nonFunctionalRequirements: normalizeJsonInput(
+          form.nonFunctionalRequirements,
+          'array',
+          'Non-functional requirements'
+        ),
+        capacityEstimations: normalizeJsonInput(
+          form.capacityEstimations,
+          'object',
+          'Capacity estimations'
+        ),
       };
       await api.post('/scenarios', payload);
       setSuccess('Scenario created successfully.');
@@ -165,7 +250,21 @@ const AdminScenarios = () => {
         title: form.title.trim(),
         description: form.description.trim(),
         difficulty: form.difficulty,
-        constraints: normalizeConstraints(form.constraints),
+        functionalRequirements: normalizeJsonInput(
+          form.functionalRequirements,
+          'array',
+          'Functional requirements'
+        ),
+        nonFunctionalRequirements: normalizeJsonInput(
+          form.nonFunctionalRequirements,
+          'array',
+          'Non-functional requirements'
+        ),
+        capacityEstimations: normalizeJsonInput(
+          form.capacityEstimations,
+          'object',
+          'Capacity estimations'
+        ),
       };
       await api.put(`/scenarios/${editingId}`, payload);
       setSuccess('Scenario updated successfully.');
@@ -296,16 +395,44 @@ const AdminScenarios = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium" htmlFor="scenario-constraints">
-                  Constraints (JSON)
+                <label className="text-sm font-medium" htmlFor="scenario-functional-requirements">
+                  Functional Requirements (one per line)
                 </label>
                 <Textarea
-                  id="scenario-constraints"
-                  name="constraints"
-                  value={form.constraints}
+                  id="scenario-functional-requirements"
+                  name="functionalRequirements"
+                  value={form.functionalRequirements}
                   onChange={onFieldChange}
-                  placeholder='{"users":"10M","latency":"200ms"}'
-                  className="min-h-32 font-mono text-xs"
+                  placeholder="Users should be able to book a cab...&#10;Users should be able to see driver location..."
+                  className="min-h-28"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium" htmlFor="scenario-non-functional-requirements">
+                  Non-Functional Requirements (one per line)
+                </label>
+                <Textarea
+                  id="scenario-non-functional-requirements"
+                  name="nonFunctionalRequirements"
+                  value={form.nonFunctionalRequirements}
+                  onChange={onFieldChange}
+                  placeholder="High availability...&#10;Low latency..."
+                  className="min-h-28"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium" htmlFor="scenario-capacity-estimations">
+                  Capacity Estimations (JSON Object)
+                </label>
+                <Textarea
+                  id="scenario-capacity-estimations"
+                  name="capacityEstimations"
+                  value={form.capacityEstimations}
+                  onChange={onFieldChange}
+                  placeholder='{"rps":"100K","storage":"10TB/day","users":"50M DAU"}'
+                  className="min-h-28 font-mono text-xs"
                 />
               </div>
 
@@ -361,11 +488,36 @@ const AdminScenarios = () => {
                     </Badge>
                   </div>
 
-                  <div className="mb-3 rounded-md bg-muted p-2">
-                    <p className="mb-1 text-xs font-medium">Constraints</p>
-                    <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-words text-xs">
-                      {prettyConstraints(scenario.constraints)}
-                    </pre>
+                  <div className="mb-3 space-y-2">
+                    <div className="rounded-md bg-muted p-2">
+                      <p className="mb-1 text-xs font-medium">Functional Requirements</p>
+                      <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-words text-xs">
+                        {prettyJson(
+                          scenario.functional_requirements,
+                          'No functional requirements provided.'
+                        )}
+                      </pre>
+                    </div>
+
+                    <div className="rounded-md bg-muted p-2">
+                      <p className="mb-1 text-xs font-medium">Non-Functional Requirements</p>
+                      <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-words text-xs">
+                        {prettyJson(
+                          scenario.non_functional_requirements,
+                          'No non-functional requirements provided.'
+                        )}
+                      </pre>
+                    </div>
+
+                    <div className="rounded-md bg-muted p-2">
+                      <p className="mb-1 text-xs font-medium">Capacity Estimations</p>
+                      <pre className="max-h-32 overflow-auto whitespace-pre-wrap break-words text-xs">
+                        {prettyJson(
+                          scenario.capacity_estimations || scenario.constraints,
+                          'No capacity estimations provided.'
+                        )}
+                      </pre>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">

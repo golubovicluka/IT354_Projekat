@@ -41,15 +41,33 @@ const parseElements = (value) => {
   }
 };
 
-const formatConstraints = (constraints) => {
-  if (!constraints) {
-    return 'No constraints provided.';
+const parseJsonArray = (value) => {
+  if (!value || typeof value !== 'string') {
+    return [];
   }
 
   try {
-    return JSON.stringify(JSON.parse(constraints), null, 2);
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return constraints;
+    return [];
+  }
+};
+
+const formatJsonObject = (value, emptyText) => {
+  if (!value || typeof value !== 'string') {
+    return emptyText;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return JSON.stringify(parsed, null, 2);
+    }
+
+    return emptyText;
+  } catch {
+    return value;
   }
 };
 
@@ -309,6 +327,13 @@ const Workspace = () => {
     );
   }
 
+  const functionalRequirements = parseJsonArray(scenario.functional_requirements);
+  const nonFunctionalRequirements = parseJsonArray(scenario.non_functional_requirements);
+  const capacityEstimations = formatJsonObject(
+    scenario.capacity_estimations || scenario.constraints,
+    'No capacity estimations provided.'
+  );
+
   return (
     <main className="flex h-screen flex-col">
       <header className="bg-background border-b px-4 py-3">
@@ -342,9 +367,39 @@ const Workspace = () => {
                   </div>
 
                   <div>
-                    <p className="mb-1 text-sm font-medium">Constraints</p>
+                    <p className="mb-1 text-sm font-medium">Functional Requirements</p>
+                    {functionalRequirements.length > 0 ? (
+                      <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+                        {functionalRequirements.map((requirement, index) => (
+                          <li key={`functional-${index}`}>{String(requirement)}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        No functional requirements provided.
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="mb-1 text-sm font-medium">Non-Functional Requirements</p>
+                    {nonFunctionalRequirements.length > 0 ? (
+                      <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+                        {nonFunctionalRequirements.map((requirement, index) => (
+                          <li key={`non-functional-${index}`}>{String(requirement)}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        No non-functional requirements provided.
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="mb-1 text-sm font-medium">Capacity Estimations</p>
                     <pre className="bg-muted max-h-[50vh] overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap break-words">
-                      {formatConstraints(scenario.constraints)}
+                      {capacityEstimations}
                     </pre>
                   </div>
                 </div>
