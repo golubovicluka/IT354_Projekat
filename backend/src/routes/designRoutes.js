@@ -33,6 +33,15 @@ const isValidDiagramData = (diagramData) => {
     }
 };
 
+const rejectAdminDesignMutation = (req, res) => {
+    if (req.user?.role !== 'ADMIN') {
+        return false;
+    }
+
+    res.status(403).json({ error: 'Admins cannot create or modify design drafts.' });
+    return true;
+};
+
 router.get('/', verifyToken, (req, res) => {
     try {
         const rawStatus = typeof req.query?.status === 'string'
@@ -100,6 +109,10 @@ router.get('/scenario/:scenarioId/draft', verifyToken, (req, res) => {
 
 router.post('/', verifyToken, (req, res) => {
     try {
+        if (rejectAdminDesignMutation(req, res)) {
+            return;
+        }
+
         const scenarioId = parsePositiveInt(req.body?.scenarioId);
         const { diagramData } = req.body ?? {};
         const textExplanation = typeof req.body?.textExplanation === 'string'
@@ -135,6 +148,10 @@ router.post('/', verifyToken, (req, res) => {
 
 router.put('/:id', verifyToken, (req, res) => {
     try {
+        if (rejectAdminDesignMutation(req, res)) {
+            return;
+        }
+
         const designId = parsePositiveInt(req.params.id);
         const { diagramData } = req.body ?? {};
         const textExplanation = typeof req.body?.textExplanation === 'string'
@@ -172,6 +189,10 @@ router.put('/:id', verifyToken, (req, res) => {
 
 router.patch('/:id/submit', verifyToken, (req, res) => {
     try {
+        if (rejectAdminDesignMutation(req, res)) {
+            return;
+        }
+
         const designId = parsePositiveInt(req.params.id);
         if (!designId) {
             return res.status(400).json({ error: 'Invalid design id.' });
