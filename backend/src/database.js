@@ -28,8 +28,10 @@ function initDb() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 description TEXT NOT NULL,
+                functional_requirements TEXT,
+                non_functional_requirements TEXT,
+                capacity_estimations TEXT,
                 difficulty TEXT CHECK(difficulty IN ('EASY', 'MEDIUM', 'HARD')),
-                constraints TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `).run();
@@ -63,6 +65,27 @@ function initDb() {
     });
 
     creatingTables();
+    ensureScenariosSchema();
+}
+
+function ensureScenariosSchema() {
+    const columnNames = db
+        .prepare('PRAGMA table_info(scenarios)')
+        .all()
+        .map((column) => column.name);
+
+    const addColumnIfMissing = (columnName, definition) => {
+        if (columnNames.includes(columnName)) {
+            return;
+        }
+
+        db.prepare(`ALTER TABLE scenarios ADD COLUMN ${columnName} ${definition}`).run();
+        columnNames.push(columnName);
+    };
+
+    addColumnIfMissing('functional_requirements', 'TEXT');
+    addColumnIfMissing('non_functional_requirements', 'TEXT');
+    addColumnIfMissing('capacity_estimations', 'TEXT');
 }
 
 export { db, initDb };

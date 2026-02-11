@@ -8,17 +8,63 @@ const getScenarioById = (id) => {
     return db.prepare('SELECT * FROM scenarios WHERE id = ?').get(id);
 };
 
-const createScenario = (title, description, difficulty, constraints) => {
+const createScenario = ({
+    title,
+    description,
+    difficulty,
+    functionalRequirements = null,
+    nonFunctionalRequirements = null,
+    capacityEstimations = null
+}) => {
     const result = db.prepare(
-        'INSERT INTO scenarios (title, description, difficulty, constraints) VALUES (?, ?, ?, ?)'
-    ).run(title, description, difficulty, constraints);
+        `INSERT INTO scenarios (
+            title,
+            description,
+            difficulty,
+            functional_requirements,
+            non_functional_requirements,
+            capacity_estimations
+        ) VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(
+        title,
+        description,
+        difficulty,
+        functionalRequirements,
+        nonFunctionalRequirements,
+        capacityEstimations
+    );
     return getScenarioById(result.lastInsertRowid);
 };
 
-const updateScenario = (id, title, description, difficulty, constraints) => {
+const updateScenario = (
+    id,
+    {
+        title,
+        description,
+        difficulty,
+        functionalRequirements = null,
+        nonFunctionalRequirements = null,
+        capacityEstimations = null
+    }
+) => {
     db.prepare(
-        'UPDATE scenarios SET title = ?, description = ?, difficulty = ?, constraints = ? WHERE id = ?'
-    ).run(title, description, difficulty, constraints, id);
+        `UPDATE scenarios
+         SET title = ?,
+             description = ?,
+             difficulty = ?,
+             functional_requirements = ?,
+             non_functional_requirements = ?,
+             capacity_estimations = ?
+         WHERE id = ?`
+    ).run(
+        title,
+        description,
+        difficulty,
+        functionalRequirements,
+        nonFunctionalRequirements,
+        capacityEstimations,
+        id
+    );
     return getScenarioById(id);
 };
 
