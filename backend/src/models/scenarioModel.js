@@ -68,8 +68,23 @@ const updateScenario = (
     return getScenarioById(id);
 };
 
-const deleteScenario = (id) => {
+const deleteScenarioTransaction = db.transaction((id) => {
+    db.prepare(
+        `DELETE FROM feedback
+         WHERE design_id IN (
+            SELECT id
+            FROM designs
+            WHERE scenario_id = ?
+         )`
+    ).run(id);
+
+    db.prepare('DELETE FROM designs WHERE scenario_id = ?').run(id);
+
     return db.prepare('DELETE FROM scenarios WHERE id = ?').run(id);
+});
+
+const deleteScenario = (id) => {
+    return deleteScenarioTransaction(id);
 };
 
 export { getAllScenarios, getScenarioById, createScenario, updateScenario, deleteScenario };

@@ -5,6 +5,11 @@ import { verifyToken, verifyAdmin } from '../middleware/authMiddleware.js';
 const router = express.Router();
 const ALLOWED_DIFFICULTIES = new Set(['EASY', 'MEDIUM', 'HARD']);
 
+const parsePositiveInt = (value) => {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
 const createValidationError = (message) => {
     const error = new Error(message);
     error.statusCode = 400;
@@ -129,7 +134,12 @@ router.put('/:id', verifyToken, verifyAdmin, (req, res) => {
 
 router.delete('/:id', verifyToken, verifyAdmin, (req, res) => {
     try {
-        const result = deleteScenario(req.params.id);
+        const scenarioId = parsePositiveInt(req.params.id);
+        if (!scenarioId) {
+            return res.status(400).json({ error: 'Invalid scenario id.' });
+        }
+
+        const result = deleteScenario(scenarioId);
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Scenario not found' });
         }
