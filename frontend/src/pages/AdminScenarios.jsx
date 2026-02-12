@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { ArrowLeft, LogOut, Pencil, Trash2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -310,9 +311,11 @@ const AdminScenarios = () => {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => navigate('/admin/review')}>
+            <ArrowLeft className="size-4" />
             Back to Review
           </Button>
           <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="size-4" />
             Logout
           </Button>
         </div>
@@ -527,6 +530,7 @@ const AdminScenarios = () => {
                       size="sm"
                       onClick={() => handleEditStart(scenario)}
                     >
+                      <Pencil className="size-4" />
                       Edit
                     </Button>
                     <Dialog
@@ -546,6 +550,7 @@ const AdminScenarios = () => {
                           onClick={() => setOpenDialogId(scenario.id)}
                           disabled={deletingId === scenario.id}
                         >
+                          <Trash2 className="size-4" />
                           {deletingId === scenario.id ? 'Deleting...' : 'Delete'}
                         </Button>
                       </DialogTrigger>
@@ -573,6 +578,7 @@ const AdminScenarios = () => {
                             onClick={() => handleDelete(scenario)}
                             disabled={deletingId === scenario.id}
                           >
+                            <Trash2 className="size-4" />
                             {deletingId === scenario.id ? 'Deleting...' : 'Delete Scenario'}
                           </Button>
                         </DialogFooter>

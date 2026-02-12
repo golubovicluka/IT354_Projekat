@@ -7,6 +7,7 @@ import AdminScenarios from "./pages/AdminScenarios.jsx";
 import Workspace from "./pages/Workspace.jsx";
 import AdminReview from "./pages/AdminReview.jsx";
 import FeedbackView from "./pages/FeedbackView.jsx";
+import ScenarioDetails from "./pages/ScenarioDetails.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -30,6 +31,14 @@ function App() {
             element={
               <ProtectedRoute disallowAdmin>
                 <Workspace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scenario/:scenarioId/details"
+            element={
+              <ProtectedRoute disallowAdmin>
+                <ScenarioDetails />
               </ProtectedRoute>
             }
           />

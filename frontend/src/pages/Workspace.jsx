@@ -12,6 +12,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+  ArrowLeft,
+  Eraser,
+  FileText,
+  ImageDown,
+  LogOut,
+  Save,
+  SendHorizonal,
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -321,6 +330,7 @@ const Workspace = () => {
         <h1 className="text-xl font-semibold">Workspace unavailable</h1>
         <p className="text-muted-foreground text-sm">{error || 'Scenario not found.'}</p>
         <Button variant="outline" onClick={() => navigate('/dashboard')}>
+          <ArrowLeft className="size-4" />
           Back to Dashboard
         </Button>
       </main>
@@ -342,6 +352,7 @@ const Workspace = () => {
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
+                  <FileText className="size-4" />
                   Scenario
                 </Button>
               </SheetTrigger>
@@ -414,9 +425,11 @@ const Workspace = () => {
 
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+              <ArrowLeft className="size-4" />
               Back
             </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="size-4" />
               Logout
             </Button>
             <Button
@@ -425,6 +438,7 @@ const Workspace = () => {
               onClick={handleClearCanvas}
               disabled={!isCanvasReady || saving || submitting}
             >
+              <Eraser className="size-4" />
               Clear
             </Button>
             <Button
@@ -433,6 +447,7 @@ const Workspace = () => {
               onClick={handleExportImage}
               disabled={!isCanvasReady || saving || submitting}
             >
+              <ImageDown className="size-4" />
               Export Image
             </Button>
             <Button
@@ -441,6 +456,7 @@ const Workspace = () => {
               onClick={handleSaveDraft}
               disabled={!isCanvasReady || saving || submitting}
             >
+              <Save className="size-4" />
               {saving ? 'Saving...' : 'Save Draft'}
             </Button>
             <Button
@@ -448,6 +464,7 @@ const Workspace = () => {
               onClick={handleSubmit}
               disabled={!isCanvasReady || saving || submitting}
             >
+              <SendHorizonal className="size-4" />
               {submitting ? 'Submitting...' : 'Submit'}
             </Button>
           </div>

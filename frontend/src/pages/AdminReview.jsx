@@ -13,6 +13,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
+import { LogOut, Save } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -446,6 +447,7 @@ const AdminReview = () => {
               Manage Scenarios
             </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="size-4" />
               Logout
             </Button>
           </div>
@@ -646,6 +648,7 @@ const AdminReview = () => {
                 </div>
 
                 <Button type="submit" disabled={!design || submitting}>
+                  <Save className="size-4" />
                   {submitting ? 'Saving...' : 'Save Grade'}
                 </Button>
               </form>

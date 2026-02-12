@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ClipboardCheck, Info, LogOut, MessageSquare, Pencil, Play, Send, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -138,14 +139,19 @@ const Dashboard = () => {
                     {user?.role === 'ADMIN' && (
                         <>
                             <Button variant="outline" onClick={() => navigate('/admin/review')}>
+                                <ClipboardCheck className="size-4" />
                                 Review Designs
                             </Button>
                             <Button variant="outline" onClick={() => navigate('/admin/scenarios')}>
+                                <Settings className="size-4" />
                                 Manage Scenarios
                             </Button>
                         </>
                     )}
-                    <Button variant="outline" onClick={handleLogout}>Logout</Button>
+                    <Button variant="outline" onClick={handleLogout}>
+                        <LogOut className="size-4" />
+                        Logout
+                    </Button>
                 </div>
             </div>
 
@@ -166,7 +172,14 @@ const Dashboard = () => {
                             ? 'View Feedback'
                             : isSubmitted
                                 ? 'Submitted'
-                            : 'Start Design';
+                                : 'Start Design';
+                    const ActionIcon = isDraft
+                        ? Pencil
+                        : isGraded
+                            ? MessageSquare
+                            : isSubmitted
+                                ? Send
+                                : Play;
 
                     const functionalRequirements = parseJsonArray(scenario.functional_requirements);
                     const capacityEstimations = parseJsonObject(
@@ -180,7 +193,7 @@ const Dashboard = () => {
                         : '';
 
                     return (
-                        <Card key={scenario.id}>
+                        <Card key={scenario.id} className="h-full">
                             <CardHeader>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                     <CardTitle>{scenario.title}</CardTitle>
@@ -197,7 +210,7 @@ const Dashboard = () => {
                                 </div>
                                 <CardDescription>{scenario.description}</CardDescription>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="flex-1 space-y-2">
                                 {functionalRequirements.length > 0 && (
                                     <p style={{ fontSize: '14px', color: '#666', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                                         <strong>Functional:</strong> {functionalRequirements.slice(0, 2).join(', ')}
@@ -210,8 +223,18 @@ const Dashboard = () => {
                                     </p>
                                 )}
 
+                            </CardContent>
+                            <CardFooter className="mt-auto flex w-full flex-col gap-2 sm:flex-row">
                                 <Button
-                                    style={{ marginTop: '10px' }}
+                                    variant="outline"
+                                    className="w-full sm:w-auto"
+                                    onClick={() => navigate(`/scenario/${scenario.id}/details`)}
+                                >
+                                    <Info className="size-4" />
+                                    Details
+                                </Button>
+                                <Button
+                                    className="w-full sm:w-auto"
                                     onClick={() => {
                                         if (isGraded && existingDesign?.id) {
                                             navigate(`/feedback/${existingDesign.id}`);
@@ -222,9 +245,10 @@ const Dashboard = () => {
                                     }}
                                     disabled={isSubmitted || (isGraded && !existingDesign?.id)}
                                 >
+                                    <ActionIcon className="size-4" />
                                     {actionLabel}
                                 </Button>
-                            </CardContent>
+                            </CardFooter>
                         </Card>
                     );
                 })}
