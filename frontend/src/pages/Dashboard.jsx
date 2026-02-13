@@ -127,15 +127,19 @@ const Dashboard = () => {
     };
 
     if (loading) {
-        return <div style={{ padding: '20px', textAlign: 'center' }}>Loading scenarios...</div>;
+        return (
+            <div className="px-5 py-5 text-center text-sm text-muted-foreground">
+                Loading scenarios...
+            </div>
+        );
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1>Dashboard</h1>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span>Welcome, {user?.username}</span>
+        <div className="mx-auto w-full max-w-6xl px-5 py-5">
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+                <div className="flex flex-wrap items-center gap-2.5">
+                    <span className="text-sm text-muted-foreground">Welcome, {user?.username}</span>
                     {user?.role === 'ADMIN' && (
                         <>
                             <Button variant="outline" onClick={() => navigate('/admin/review')}>
@@ -155,11 +159,13 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {designsError && !error && <p style={{ color: '#b45309' }}>{designsError}</p>}
+            {error && <p className="mb-3 text-sm font-medium text-red-600">{error}</p>}
+            {designsError && !error && (
+                <p className="mb-3 text-sm font-medium text-amber-700">{designsError}</p>
+            )}
 
-            <h2 style={{ marginBottom: '15px' }}>Available Scenarios</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+            <h2 className="mb-4 text-lg font-semibold">Available Scenarios</h2>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {scenarios.map((scenario) => {
                     const existingDesign = designsByScenarioId[scenario.id] || null;
                     const existingStatus = existingDesign?.status || null;
@@ -195,9 +201,9 @@ const Dashboard = () => {
                     return (
                         <Card key={scenario.id} className="h-full">
                             <CardHeader>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                <div className="flex items-start justify-between gap-2">
                                     <CardTitle>{scenario.title}</CardTitle>
-                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <div className="flex items-center gap-2">
                                         <Badge className={getDifficultyClassName(scenario.difficulty)}>
                                             {scenario.difficulty}
                                         </Badge>
@@ -212,13 +218,13 @@ const Dashboard = () => {
                             </CardHeader>
                             <CardContent className="flex-1 space-y-2">
                                 {functionalRequirements.length > 0 && (
-                                    <p style={{ fontSize: '14px', color: '#666', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                                    <p className="break-words text-sm text-muted-foreground">
                                         <strong>Functional:</strong> {functionalRequirements.slice(0, 2).join(', ')}
                                     </p>
                                 )}
 
                                 {capacitySummary && (
-                                    <p style={{ marginTop: '6px', fontSize: '14px', color: '#666', wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                                    <p className="break-words text-sm text-muted-foreground">
                                         <strong>Capacity:</strong> {capacitySummary}
                                     </p>
                                 )}
@@ -255,7 +261,7 @@ const Dashboard = () => {
             </div>
 
             {scenarios.length === 0 && !error && (
-                <p>No scenarios available.</p>
+                <p className="mt-4 text-sm text-muted-foreground">No scenarios available.</p>
             )}
         </div>
     );

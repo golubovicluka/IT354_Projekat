@@ -13,7 +13,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { LogOut, Save } from 'lucide-react';
+import { FileText, LogOut, Save, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 
@@ -361,6 +361,7 @@ const AdminReview = () => {
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm" disabled={!design}>
+                  <FileText className="size-4" />
                   Scenario
                 </Button>
               </SheetTrigger>
@@ -444,6 +445,7 @@ const AdminReview = () => {
               size="sm"
               onClick={() => navigate('/admin/scenarios')}
             >
+              <Settings className="size-4" />
               Manage Scenarios
             </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
