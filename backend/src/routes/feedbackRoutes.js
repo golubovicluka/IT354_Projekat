@@ -1,7 +1,7 @@
 import express from 'express';
 import { verifyAdmin, verifyToken } from '../middleware/authMiddleware.js';
-import { getDesignById, markDesignAsGraded } from '../models/designModel.js';
-import { getFeedbackByDesignId, upsertFeedback } from '../models/feedbackModel.js';
+import { getDesignById, markDesignAsGraded, markDesignAsSubmitted } from '../models/designModel.js';
+import { deleteFeedbackByDesignId, getFeedbackByDesignId, upsertFeedback } from '../models/feedbackModel.js';
 
 const router = express.Router();
 
@@ -95,6 +95,44 @@ router.get('/:designId', verifyToken, (req, res) => {
         });
     } catch (error) {
         console.error('Get Feedback Error:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.delete('/:designId', verifyToken, verifyAdmin, (req, res) => {
+    try {
+        const designId = parsePositiveInt(req.params.designId);
+        if (!designId) {
+            return res.status(400).json({ error: 'Invalid design id.' });
+        }
+
+        const design = getDesignById(designId);
+        if (!design) {
+            return res.status(404).json({ error: 'Design not found.' });
+        }
+
+        const feedback = getFeedbackByDesignId(designId);
+        if (!feedback) {
+            return res.status(404).json({ error: 'Feedback not found for this design.' });
+        }
+
+        const deleted = deleteFeedbackByDesignId(designId);
+        if (deleted.changes === 0) {
+            return res.status(404).json({ error: 'Feedback not found for this design.' });
+        }
+
+        let designStatus = design.status;
+        if (design.status === 'GRADED') {
+            markDesignAsSubmitted(designId);
+            designStatus = 'SUBMITTED';
+        }
+
+        return res.json({
+            message: 'Feedback deleted successfully.',
+            designStatus,
+        });
+    } catch (error) {
+        console.error('Delete Feedback Error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });

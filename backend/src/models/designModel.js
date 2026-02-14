@@ -120,6 +120,16 @@ const markDesignAsGraded = (id) => {
     return getDesignById(id);
 };
 
+const markDesignAsSubmitted = (id) => {
+    db.prepare(
+        `UPDATE designs
+         SET status = 'SUBMITTED'
+         WHERE id = ?`
+    ).run(id);
+
+    return getDesignById(id);
+};
+
 const upsertDraftDesign = (userId, scenarioId, diagramData, textExplanation = '') => {
     const existingDraft = getDraftByUserAndScenario(userId, scenarioId);
 
@@ -142,5 +152,6 @@ export {
     updateDraftDesign,
     submitDraftDesign,
     markDesignAsGraded,
+    markDesignAsSubmitted,
     upsertDraftDesign,
 };

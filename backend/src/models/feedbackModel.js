@@ -24,4 +24,8 @@ const upsertFeedback = (designId, adminId, rating, comments = '') => {
     return getFeedbackByDesignId(designId);
 };
 
-export { getFeedbackByDesignId, upsertFeedback };
+const deleteFeedbackByDesignId = (designId) => {
+    return db.prepare('DELETE FROM feedback WHERE design_id = ?').run(designId);
+};
+
+export { getFeedbackByDesignId, upsertFeedback, deleteFeedbackByDesignId };
