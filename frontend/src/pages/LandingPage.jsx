@@ -106,7 +106,6 @@ const LandingPage = () => {
     return (
         <div className="dark">
             <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-indigo-500/30">
-                {/* Navigation */}
                 <nav className="fixed top-0 z-50 w-full border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
                     <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
                         <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
@@ -116,7 +115,6 @@ const LandingPage = () => {
                             <span>Architex</span>
                         </div>
 
-                        {/* Desktop Nav */}
                         <div className="hidden items-center gap-8 text-sm font-medium text-zinc-400 md:flex">
                             {NAV_LINKS.map((link) => (
                                 <a
@@ -135,7 +133,6 @@ const LandingPage = () => {
                             </Button>
                         </div>
 
-                        {/* Mobile Toggle */}
                         <button
                             type="button"
                             className="p-2 text-zinc-400 md:hidden"
@@ -146,7 +143,6 @@ const LandingPage = () => {
                         </button>
                     </div>
 
-                    {/* Mobile Nav */}
                     {mobileMenuOpen && (
                         <div className="space-y-4 border-t border-zinc-800 bg-zinc-950 px-4 py-6 md:hidden">
                             {NAV_LINKS.map((link) => (
@@ -171,7 +167,6 @@ const LandingPage = () => {
                     )}
                 </nav>
 
-                {/* Hero Section */}
                 <section className="relative overflow-hidden pt-32 pb-20 md:pt-48 md:pb-32">
                     <div className="pointer-events-none absolute top-0 left-1/2 h-[500px] w-[1000px] -translate-x-1/2 rounded-full bg-indigo-500/20 opacity-50 blur-[120px]" />
 
@@ -223,14 +218,12 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* Visual Demo Section */}
                 <section className="container mx-auto px-4 py-10 md:px-6">
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-2 shadow-2xl backdrop-blur-sm md:p-4">
                         <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950 md:aspect-[21/9]">
                             <div className="absolute inset-0 bg-[radial-gradient(#1e1e24_1px,transparent_1px)] opacity-50 [background-size:16px_16px]" />
 
                             <div className="relative z-10 grid grid-cols-3 items-center gap-12 md:gap-24">
-                                {/* Client */}
                                 <div className="flex flex-col items-center gap-2">
                                     <div className="flex h-16 w-16 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800 shadow-lg">
                                         <Users className="h-8 w-8 text-zinc-400" />
@@ -240,7 +233,6 @@ const LandingPage = () => {
                                     </span>
                                 </div>
 
-                                {/* Load Balancer */}
                                 <div className="relative flex flex-col items-center gap-2">
                                     <div className="absolute -left-12 top-1/2 h-[2px] w-12 bg-gradient-to-r from-zinc-700 to-indigo-500/50" />
                                     <div className="absolute -right-12 top-1/2 h-[2px] w-12 bg-gradient-to-r from-indigo-500/50 to-zinc-700" />
@@ -253,7 +245,6 @@ const LandingPage = () => {
                                     </span>
                                 </div>
 
-                                {/* Services */}
                                 <div className="flex flex-col gap-4">
                                     <div className="flex h-12 w-32 items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800 shadow-lg">
                                         <Server className="h-4 w-4 text-emerald-500" />
@@ -269,7 +260,6 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* Feature Grid */}
                 <section id="features" className="bg-zinc-950 py-24">
                     <div className="container mx-auto px-4 md:px-6">
                         <div className="grid gap-8 md:grid-cols-3">
@@ -295,7 +285,6 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* Stats / Proof */}
                 <section className="border-y border-zinc-900 bg-zinc-900/20 py-20">
                     <div className="container mx-auto px-4 md:px-6">
                         <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
@@ -311,7 +300,6 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* Pricing */}
                 <section id="pricing" className="container mx-auto px-4 py-24 md:px-6">
                     <div className="mb-16 space-y-4 text-center">
                         <h2 className="text-3xl font-bold md:text-4xl">
@@ -327,8 +315,8 @@ const LandingPage = () => {
                             <Card
                                 key={tier.name}
                                 className={`relative flex flex-col overflow-hidden p-8 text-zinc-50 ${tier.highlighted
-                                        ? 'border-indigo-500/50 bg-zinc-900/50'
-                                        : 'border-zinc-800 bg-zinc-950'
+                                    ? 'border-indigo-500/50 bg-zinc-900/50'
+                                    : 'border-zinc-800 bg-zinc-950'
                                     }`}
                             >
                                 {tier.highlighted && (
@@ -364,8 +352,8 @@ const LandingPage = () => {
                                             >
                                                 <CheckCircle2
                                                     className={`h-4 w-4 ${tier.highlighted
-                                                            ? 'text-indigo-500'
-                                                            : 'text-zinc-600'
+                                                        ? 'text-indigo-500'
+                                                        : 'text-zinc-600'
                                                         }`}
                                                 />
                                                 {feature}
@@ -376,8 +364,8 @@ const LandingPage = () => {
                                     <Button
                                         variant={tier.variant}
                                         className={`w-full ${tier.highlighted
-                                                ? 'border-none bg-indigo-600 text-white hover:bg-indigo-700'
-                                                : ''
+                                            ? 'border-none bg-indigo-600 text-white hover:bg-indigo-700'
+                                            : ''
                                             }`}
                                         asChild
                                     >
@@ -389,7 +377,6 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* CTA Section */}
                 <section className="relative overflow-hidden py-24">
                     <div className="absolute inset-0 bg-indigo-600/5" />
                     <div className="container relative z-10 mx-auto px-4 text-center md:px-6">
@@ -419,7 +406,6 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* Footer */}
                 <footer className="border-t border-zinc-900 bg-zinc-950 py-12 text-sm">
                     <div className="container mx-auto grid grid-cols-2 gap-8 px-4 md:grid-cols-4 md:px-6">
                         <div>
