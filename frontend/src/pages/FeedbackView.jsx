@@ -15,7 +15,7 @@ import {
 import { ArrowLeft, FileText, LogOut } from 'lucide-react';
 import useAuth from '@/context/useAuth';
 import { difficultyBadgeClassName, designStatusBadgeClassName } from '@/lib/badgeStyles';
-import api from '@/lib/api';
+import { designService } from '@/services/designService';
 import {
   formatDateTime,
   formatJsonObject,
@@ -60,12 +60,11 @@ const FeedbackView = () => {
       setError('');
 
       try {
-        const designResponse = await api.get(`/designs/${parsedDesignId}`);
+        const designData = await designService.getById(parsedDesignId);
         let loadedFeedback = null;
 
         try {
-          const feedbackResponse = await api.get(`/feedback/${parsedDesignId}`);
-          loadedFeedback = feedbackResponse.data;
+          loadedFeedback = await designService.getFeedback(parsedDesignId);
         } catch (feedbackError) {
           if (feedbackError.response?.status !== 404) {
             throw feedbackError;
@@ -76,7 +75,7 @@ const FeedbackView = () => {
           return;
         }
 
-        setDesign(designResponse.data);
+        setDesign(designData);
         setFeedback(loadedFeedback);
       } catch (err) {
         if (!cancelled) {

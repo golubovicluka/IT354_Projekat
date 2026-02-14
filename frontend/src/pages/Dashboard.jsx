@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { ClipboardCheck, Info, LogOut, MessageSquare, Pencil, Play, Send, Settings } from 'lucide-react';
 import useAuth from '@/context/useAuth';
 import { getDifficultyBadgeClassName, getDesignStatusBadgeClassName } from '@/lib/badgeStyles';
-import api from '@/lib/api';
+import { scenarioService } from '@/services/scenarioService';
+import { designService } from '@/services/designService';
 import { parseJsonArray, parseJsonObject } from '@/lib/scenarioFormatters';
 
 const Dashboard = () => {
@@ -22,12 +23,12 @@ const Dashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 const [scenariosResult, designsResult] = await Promise.allSettled([
-                    api.get('/scenarios'),
-                    api.get('/designs'),
+                    scenarioService.getAll(),
+                    designService.getAll(),
                 ]);
 
                 if (scenariosResult.status === 'fulfilled') {
-                    setScenarios(scenariosResult.value.data || []);
+                    setScenarios(scenariosResult.value || []);
                     setError('');
                 } else {
                     setError('Failed to load scenarios');
@@ -36,7 +37,7 @@ const Dashboard = () => {
 
                 if (designsResult.status === 'fulfilled') {
                     const latestDesignByScenario = {};
-                    const designs = Array.isArray(designsResult.value.data) ? designsResult.value.data : [];
+                    const designs = Array.isArray(designsResult.value) ? designsResult.value : [];
                     const userScopedDesigns = user?.id
                         ? designs.filter((design) => design.user_id === user.id)
                         : designs;
@@ -141,9 +142,9 @@ const Dashboard = () => {
                     );
                     const capacitySummary = capacityEstimations
                         ? Object.entries(capacityEstimations)
-                              .slice(0, 3)
-                              .map(([key, value]) => `${key}: ${value}`)
-                              .join(' | ')
+                            .slice(0, 3)
+                            .map(([key, value]) => `${key}: ${value}`)
+                            .join(' | ')
                         : '';
 
                     return (

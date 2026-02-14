@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ArrowLeft, LogOut, MessageSquare, Pencil, Play, Send } from 'lucide-react';
 import useAuth from '@/context/useAuth';
 import { getDifficultyBadgeClassName, getDesignStatusBadgeClassName } from '@/lib/badgeStyles';
-import api from '@/lib/api';
+import { scenarioService } from '@/services/scenarioService';
+import { designService } from '@/services/designService';
 import { formatJsonObject, parseJsonArray } from '@/lib/scenarioFormatters';
 
 const ScenarioDetails = () => {
@@ -40,8 +41,8 @@ const ScenarioDetails = () => {
 
       try {
         const [scenarioResult, designsResult] = await Promise.allSettled([
-          api.get(`/scenarios/${parsedScenarioId}`),
-          api.get('/designs'),
+          scenarioService.getById(parsedScenarioId),
+          designService.getAll(),
         ]);
 
         if (cancelled) {
@@ -49,14 +50,14 @@ const ScenarioDetails = () => {
         }
 
         if (scenarioResult.status === 'fulfilled') {
-          setScenario(scenarioResult.value.data || null);
+          setScenario(scenarioResult.value || null);
         } else {
           setScenario(null);
           setError(scenarioResult.reason?.response?.data?.error || 'Failed to load scenario.');
         }
 
         if (designsResult.status === 'fulfilled') {
-          const designs = Array.isArray(designsResult.value.data) ? designsResult.value.data : [];
+          const designs = Array.isArray(designsResult.value) ? designsResult.value : [];
           const userScopedDesigns = user?.id
             ? designs.filter((design) => design.user_id === user.id)
             : designs;

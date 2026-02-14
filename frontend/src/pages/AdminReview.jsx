@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { FileText, LogOut, Save, Settings } from 'lucide-react';
 import useAuth from '@/context/useAuth';
 import { difficultyBadgeClassName, designStatusBadgeClassName } from '@/lib/badgeStyles';
-import api from '@/lib/api';
+import { designService } from '@/services/designService';
 import {
   formatDateTime,
   formatJsonObject,
@@ -61,19 +61,17 @@ const AdminReview = () => {
       setQueueError('');
 
       try {
-        const [submittedResponse, gradedResponse] = await Promise.all([
-          api.get('/designs?status=SUBMITTED'),
-          api.get('/designs?status=GRADED'),
+        const [submitted, graded] = await Promise.all([
+          designService.getAll({ status: 'SUBMITTED' }),
+          designService.getAll({ status: 'GRADED' }),
         ]);
 
         if (cancelled) {
           return;
         }
 
-        setSubmittedDesigns(
-          Array.isArray(submittedResponse.data) ? submittedResponse.data : []
-        );
-        setGradedDesigns(Array.isArray(gradedResponse.data) ? gradedResponse.data : []);
+        setSubmittedDesigns(Array.isArray(submitted) ? submitted : []);
+        setGradedDesigns(Array.isArray(graded) ? graded : []);
       } catch (error) {
         if (!cancelled) {
           setQueueError(error.response?.data?.error || 'Failed to load review queue.');
@@ -156,12 +154,11 @@ const AdminReview = () => {
       setSuccess('');
 
       try {
-        const designResponse = await api.get(`/designs/${selectedDesignId}`);
+        const designData = await designService.getById(selectedDesignId);
         let loadedFeedback = null;
 
         try {
-          const feedbackResponse = await api.get(`/feedback/${selectedDesignId}`);
-          loadedFeedback = feedbackResponse.data;
+          loadedFeedback = await designService.getFeedback(selectedDesignId);
         } catch (feedbackError) {
           if (feedbackError.response?.status !== 404) {
             throw feedbackError;
@@ -172,7 +169,7 @@ const AdminReview = () => {
           return;
         }
 
-        setDesign(designResponse.data);
+        setDesign(designData);
         setFeedback(loadedFeedback);
 
         if (loadedFeedback) {
@@ -238,13 +235,13 @@ const AdminReview = () => {
         throw new Error('Rating must be an integer between 1 and 5.');
       }
 
-      const response = await api.post('/feedback', {
+      const response = await designService.submitFeedback({
         designId: selectedDesignId,
         rating,
         comments: form.comments,
       });
 
-      const savedFeedback = response.data?.feedback || null;
+      const savedFeedback = response.feedback || null;
 
       if (savedFeedback) {
         setFeedback(savedFeedback);
@@ -451,11 +448,10 @@ const AdminReview = () => {
                     <button
                       key={`submitted-${item.id}`}
                       type="button"
-                      className={`w-full rounded-md border p-3 text-left transition-colors ${
-                        selectedDesignId === item.id
-                          ? 'border-blue-400 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/40'
-                          : 'hover:bg-muted/60'
-                      }`}
+                      className={`w-full rounded-md border p-3 text-left transition-colors ${selectedDesignId === item.id
+                        ? 'border-blue-400 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/40'
+                        : 'hover:bg-muted/60'
+                        }`}
                       onClick={() => handleSelectDesign(item.id)}
                     >
                       <p className="text-sm font-medium">
@@ -487,11 +483,10 @@ const AdminReview = () => {
                     <button
                       key={`graded-${item.id}`}
                       type="button"
-                      className={`w-full rounded-md border p-3 text-left transition-colors ${
-                        selectedDesignId === item.id
-                          ? 'border-green-400 bg-green-50 dark:border-green-700 dark:bg-green-950/40'
-                          : 'hover:bg-muted/60'
-                      }`}
+                      className={`w-full rounded-md border p-3 text-left transition-colors ${selectedDesignId === item.id
+                        ? 'border-green-400 bg-green-50 dark:border-green-700 dark:bg-green-950/40'
+                        : 'hover:bg-muted/60'
+                        }`}
                       onClick={() => handleSelectDesign(item.id)}
                     >
                       <p className="text-sm font-medium">

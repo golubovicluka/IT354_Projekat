@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 import useAuth from '@/context/useAuth';
 import { getDifficultyBadgeClassName } from '@/lib/badgeStyles';
-import api from '@/lib/api';
+import { scenarioService } from '@/services/scenarioService';
+import { designService } from '@/services/designService';
 import {
   formatJsonObject,
   parseElementsOrNull,
@@ -74,20 +75,17 @@ const Workspace = () => {
       setError('');
 
       try {
-        const [scenarioResponse, draftResponse] = await Promise.all([
-          api.get(`/scenarios/${parsedScenarioId}`),
-          api.get(`/designs/scenario/${parsedScenarioId}/draft`),
+        const [scenarioData, draftData] = await Promise.all([
+          scenarioService.getById(parsedScenarioId),
+          designService.getDraft(parsedScenarioId),
         ]);
 
         if (cancelled) {
           return;
         }
 
-        const loadedScenario = scenarioResponse.data;
-        const loadedDraft = draftResponse.data;
-
-        setScenario(loadedScenario);
-        setDesignId(loadedDraft?.id ?? null);
+        setScenario(scenarioData);
+        setDesignId(draftData?.id ?? null);
 
         const localDraft = draftStorageKey ? localStorage.getItem(draftStorageKey) : null;
         const localElements = parseElementsOrNull(localDraft);
@@ -96,7 +94,7 @@ const Workspace = () => {
           localStorage.removeItem(draftStorageKey);
         }
 
-        const cloudElements = parseElementsOrNull(loadedDraft?.diagram_data);
+        const cloudElements = parseElementsOrNull(draftData?.diagram_data);
         const preferredElements = localElements ?? cloudElements ?? [];
         latestElementsRef.current = preferredElements;
         setInitialData({ elements: preferredElements });
@@ -161,11 +159,10 @@ const Workspace = () => {
     const diagramData = JSON.stringify(elements);
     const payload = { diagramData, textExplanation: '' };
 
-    const response = designId
-      ? await api.put(`/designs/${designId}`, payload)
-      : await api.post('/designs', { scenarioId: parsedScenarioId, ...payload });
+    const savedDesign = designId
+      ? await designService.update(designId, payload)
+      : await designService.create({ scenarioId: parsedScenarioId, ...payload });
 
-    const savedDesign = response.data;
     setDesignId(savedDesign.id);
 
     if (draftStorageKey) {
@@ -196,7 +193,7 @@ const Workspace = () => {
 
     try {
       const savedDesign = await persistDraft();
-      await api.patch(`/designs/${savedDesign.id}/submit`);
+      await designService.submit(savedDesign.id);
 
       if (draftStorageKey) {
         localStorage.removeItem(draftStorageKey);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +24,8 @@ import {
 import { ArrowLeft, LogOut, Pencil, Trash2 } from 'lucide-react';
 import useAuth from '@/context/useAuth';
 import { difficultyBadgeClassName } from '@/lib/badgeStyles';
-import api from '@/lib/api';
+import { scenarioService } from '@/services/scenarioService';
+import useFetch from '@/hooks/useFetch';
 
 const INITIAL_FORM = {
   title: '',
@@ -126,37 +127,25 @@ const normalizeJsonInput = (value, expectedType, fieldLabel) => {
 };
 
 const AdminScenarios = () => {
-  const [scenarios, setScenarios] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: scenarios,
+    loading,
+    error: fetchError,
+    execute: fetchScenarios
+  } = useFetch(scenarioService.getAll);
+
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [openDialogId, setOpenDialogId] = useState(null);
   const [form, setForm] = useState(INITIAL_FORM);
   const [editingId, setEditingId] = useState(null);
-  const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
   const [success, setSuccess] = useState('');
   const { logout } = useAuth();
   const navigate = useNavigate();
 
+  const error = fetchError || actionError;
   const isEditing = editingId !== null;
-
-  const fetchScenarios = useCallback(async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await api.get('/scenarios');
-      setScenarios(response.data);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load scenarios.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchScenarios();
-  }, [fetchScenarios]);
 
   const resetForm = () => {
     setForm(INITIAL_FORM);
@@ -175,7 +164,7 @@ const AdminScenarios = () => {
 
   const handleEditStart = (scenario) => {
     setSuccess('');
-    setError('');
+    setActionError('');
     setEditingId(scenario.id);
     setForm({
       title: scenario.title || '',
@@ -198,7 +187,7 @@ const AdminScenarios = () => {
   const handleCreate = async (event) => {
     event.preventDefault();
     setSubmitting(true);
-    setError('');
+    setActionError('');
     setSuccess('');
 
     try {
@@ -223,12 +212,15 @@ const AdminScenarios = () => {
           'Capacity estimations'
         ),
       };
-      await api.post('/scenarios', payload);
+      await scenarioService.create(payload);
       setSuccess('Scenario created successfully.');
       resetForm();
       await fetchScenarios();
+      // useFetch updates the data state automatically, but we might need to handle scenarios if useFetch doesn't return it directly to the state used in render if we were using local state. 
+      // But here useFetch provides 'data' which is assigned to 'scenarios'. 
+      // However, fetchScenarios returns the response, and useFetch updates internal state.
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Failed to create scenario.');
+      setActionError(err.response?.data?.error || err.message || 'Failed to create scenario.');
     } finally {
       setSubmitting(false);
     }
@@ -237,7 +229,7 @@ const AdminScenarios = () => {
   const handleUpdate = async (event) => {
     event.preventDefault();
     setSubmitting(true);
-    setError('');
+    setActionError('');
     setSuccess('');
 
     try {
@@ -262,12 +254,12 @@ const AdminScenarios = () => {
           'Capacity estimations'
         ),
       };
-      await api.put(`/scenarios/${editingId}`, payload);
+      await scenarioService.update(editingId, payload);
       setSuccess('Scenario updated successfully.');
       resetForm();
       await fetchScenarios();
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Failed to update scenario.');
+      setActionError(err.response?.data?.error || err.message || 'Failed to update scenario.');
     } finally {
       setSubmitting(false);
     }
@@ -275,12 +267,12 @@ const AdminScenarios = () => {
 
   const handleDelete = async (scenario) => {
     setDeletingId(scenario.id);
-    setError('');
+    setActionError('');
     setSuccess('');
 
     try {
-      await api.delete(`/scenarios/${scenario.id}`);
-      setScenarios((prev) => prev.filter((item) => item.id !== scenario.id));
+      await scenarioService.delete(scenario.id);
+      await fetchScenarios();
       if (editingId === scenario.id) {
         resetForm();
       }
@@ -289,7 +281,7 @@ const AdminScenarios = () => {
       }
       setSuccess('Scenario deleted successfully.');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to delete scenario.');
+      setActionError(err.response?.data?.error || 'Failed to delete scenario.');
     } finally {
       setDeletingId(null);
     }
@@ -472,7 +464,7 @@ const AdminScenarios = () => {
             )}
 
             <div className="space-y-3">
-              {scenarios.map((scenario) => (
+              {(scenarios || []).map((scenario) => (
                 <article key={scenario.id} className="rounded-lg border p-4">
                   <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                     <div>
