@@ -8,6 +8,7 @@ import Workspace from "./pages/Workspace.jsx";
 import AdminReview from "./pages/AdminReview.jsx";
 import FeedbackView from "./pages/FeedbackView.jsx";
 import ScenarioDetails from "./pages/ScenarioDetails.jsx";
+import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -82,6 +83,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
