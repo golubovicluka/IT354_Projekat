@@ -13,7 +13,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { FileText, LogOut, Save, Settings } from 'lucide-react';
+import { FileText, LogOut, Save, Settings, Trash2 } from 'lucide-react';
 import useAuth from '@/context/useAuth';
 import { difficultyBadgeClassName, designStatusBadgeClassName } from '@/lib/badgeStyles';
 import { designService } from '@/services/designService';
@@ -44,6 +44,7 @@ const AdminReview = () => {
 
   const [form, setForm] = useState({ rating: '', comments: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [deletingFeedback, setDeletingFeedback] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const parsedRouteDesignId = useMemo(() => parsePositiveInt(designId), [designId]);
@@ -552,7 +553,7 @@ const AdminReview = () => {
                       setForm((previous) => ({ ...previous, rating: event.target.value }))
                     }
                     required
-                    disabled={!design || submitting}
+                    disabled={!design || submitting || deletingFeedback}
                   >
                     <option value="">Select rating</option>
                     <option value="1">1</option>
@@ -576,14 +577,82 @@ const AdminReview = () => {
                     }
                     placeholder="Explain strengths, trade-offs, and improvements..."
                     className="min-h-36"
-                    disabled={!design || submitting}
+                    disabled={!design || submitting || deletingFeedback}
                   />
                 </div>
 
-                <Button type="submit" disabled={!design || submitting}>
-                  <Save className="size-4" />
-                  {submitting ? 'Saving...' : 'Save Grade'}
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="submit"
+                    disabled={!design || submitting || deletingFeedback}
+                  >
+                    <Save className="size-4" />
+                    {submitting ? 'Saving...' : 'Save Grade'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={!design || !feedback || submitting || deletingFeedback}
+                    onClick={async () => {
+                      if (!selectedDesignId) {
+                        return;
+                      }
+
+                      setDeletingFeedback(true);
+                      setDesignError('');
+                      setSuccess('');
+
+                      try {
+                        await designService.deleteFeedback(selectedDesignId);
+
+                        const demotedDesign = design
+                          ? { ...design, status: 'SUBMITTED' }
+                          : null;
+
+                        setFeedback(null);
+                        setForm({ rating: '', comments: '' });
+                        setDesign(demotedDesign);
+
+                        setGradedDesigns((previous) =>
+                          previous.filter((item) => item.id !== selectedDesignId)
+                        );
+
+                        setSubmittedDesigns((previous) => {
+                          if (!demotedDesign) {
+                            return previous;
+                          }
+
+                          const alreadySubmitted = previous.some(
+                            (item) => item.id === selectedDesignId
+                          );
+
+                          if (alreadySubmitted) {
+                            return previous.map((item) =>
+                              item.id === selectedDesignId
+                                ? { ...item, status: 'SUBMITTED' }
+                                : item
+                            );
+                          }
+
+                          return [{ ...demotedDesign, status: 'SUBMITTED' }, ...previous];
+                        });
+
+                        setSuccess('Feedback deleted successfully.');
+                      } catch (error) {
+                        setDesignError(
+                          error.response?.data?.error ||
+                          error.message ||
+                          'Failed to delete feedback.'
+                        );
+                      } finally {
+                        setDeletingFeedback(false);
+                      }
+                    }}
+                  >
+                    <Trash2 className="size-4" />
+                    {deletingFeedback ? 'Deleting...' : 'Delete review'}
+                  </Button>
+                </div>
               </form>
 
               {design?.text_explanation && (

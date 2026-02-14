@@ -40,4 +40,9 @@ export const designService = {
         const response = await api.post('/feedback', data);
         return response.data;
     },
+
+    deleteFeedback: async (designId) => {
+        const response = await api.delete(`/feedback/${designId}`);
+        return response.data;
+    },
 };
