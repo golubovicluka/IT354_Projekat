@@ -12,69 +12,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { ArrowLeft, FileText, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { difficultyBadgeClassName, designStatusBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
-
-const parseElements = (value) => {
-  if (!value || typeof value !== 'string') {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-const parseJsonArray = (value) => {
-  if (!value || typeof value !== 'string') {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-const formatJsonObject = (value, emptyText) => {
-  if (!value || typeof value !== 'string') {
-    return emptyText;
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-      return JSON.stringify(parsed, null, 2);
-    }
-  } catch {
-    return value;
-  }
-
-  return emptyText;
-};
-
-const formatDateTime = (value) => {
-  if (!value) {
-    return 'N/A';
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return parsed.toLocaleString();
-};
-
-const statusBadgeClassName = {
-  SUBMITTED: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-  GRADED: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
-};
+import {
+  formatDateTime,
+  formatJsonObject,
+  parseElements,
+  parseJsonArray,
+} from '@/lib/scenarioFormatters';
 
 const FeedbackView = () => {
   const { designId } = useParams();
@@ -168,6 +115,7 @@ const FeedbackView = () => {
         <h1 className="text-xl font-semibold">Feedback unavailable</h1>
         <p className="text-muted-foreground text-sm">{error || 'Design not found.'}</p>
         <Button variant="outline" onClick={() => navigate('/dashboard')}>
+          <ArrowLeft className="size-4" />
           Back to Dashboard
         </Button>
       </main>
@@ -190,6 +138,7 @@ const FeedbackView = () => {
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
+                  <FileText className="size-4" />
                   Scenario
                 </Button>
               </SheetTrigger>
@@ -255,17 +204,19 @@ const FeedbackView = () => {
 
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+              <ArrowLeft className="size-4" />
               Back
             </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="size-4" />
               Logout
             </Button>
           </div>
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-          <Badge className={statusBadgeClassName[design.status] || ''}>{design.status}</Badge>
-          <Badge className="bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+          <Badge className={designStatusBadgeClassName[design.status] || ''}>{design.status}</Badge>
+          <Badge className={difficultyBadgeClassName[design.scenario_difficulty] || ''}>
             {design.scenario_difficulty}
           </Badge>
           {error && <span className="text-red-700">{error}</span>}

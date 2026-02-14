@@ -15,79 +15,15 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { FileText, LogOut, Save, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { difficultyBadgeClassName, designStatusBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
-
-const parseElements = (value) => {
-  if (!value || typeof value !== 'string') {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-const parseJsonArray = (value) => {
-  if (!value || typeof value !== 'string') {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-const formatJsonObject = (value, emptyText) => {
-  if (!value || typeof value !== 'string') {
-    return emptyText;
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-      return JSON.stringify(parsed, null, 2);
-    }
-  } catch {
-    return value;
-  }
-
-  return emptyText;
-};
-
-const formatDateTime = (value) => {
-  if (!value) {
-    return 'N/A';
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return parsed.toLocaleString();
-};
-
-const parsePositiveInt = (value) => {
-  const parsed = Number.parseInt(value, 10);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-};
-
-const statusBadgeClassName = {
-  SUBMITTED: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-  GRADED: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
-};
-
-const difficultyBadgeClassName = {
-  EASY: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
-  MEDIUM: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-  HARD: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
-};
+import {
+  formatDateTime,
+  formatJsonObject,
+  parseElements,
+  parseJsonArray,
+  parsePositiveInt,
+} from '@/lib/scenarioFormatters';
 
 const AdminReview = () => {
   const { designId } = useParams();
@@ -457,7 +393,7 @@ const AdminReview = () => {
 
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
           {design?.status && (
-            <Badge className={statusBadgeClassName[design.status] || ''}>{design.status}</Badge>
+            <Badge className={designStatusBadgeClassName[design.status] || ''}>{design.status}</Badge>
           )}
           {design?.scenario_difficulty && (
             <Badge className={difficultyBadgeClassName[design.scenario_difficulty] || ''}>

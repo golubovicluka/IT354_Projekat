@@ -5,63 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, LogOut, MessageSquare, Pencil, Play, Send } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { getDifficultyBadgeClassName, getDesignStatusBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
-
-const getDifficultyClassName = (difficulty) => {
-  switch (difficulty) {
-    case 'EASY':
-      return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300';
-    case 'MEDIUM':
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
-    case 'HARD':
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300';
-    default:
-      return '';
-  }
-};
-
-const getDesignStatusClassName = (status) => {
-  switch (status) {
-    case 'DRAFT':
-      return 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300';
-    case 'SUBMITTED':
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
-    case 'GRADED':
-      return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300';
-    default:
-      return '';
-  }
-};
-
-const parseJsonArray = (value) => {
-  if (!value || typeof value !== 'string') {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-const formatJsonObject = (value, emptyText) => {
-  if (!value || typeof value !== 'string') {
-    return emptyText;
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-      return JSON.stringify(parsed, null, 2);
-    }
-
-    return emptyText;
-  } catch {
-    return value;
-  }
-};
+import { formatJsonObject, parseJsonArray } from '@/lib/scenarioFormatters';
 
 const ScenarioDetails = () => {
   const { scenarioId } = useParams();
@@ -228,11 +174,11 @@ const ScenarioDetails = () => {
       </header>
 
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <Badge className={getDifficultyClassName(scenario.difficulty)}>
+        <Badge className={getDifficultyBadgeClassName(scenario.difficulty)}>
           {scenario.difficulty}
         </Badge>
         {existingStatus && (
-          <Badge className={getDesignStatusClassName(existingStatus)}>
+          <Badge className={getDesignStatusBadgeClassName(existingStatus)}>
             {existingStatus}
           </Badge>
         )}

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { ArrowLeft, LogOut, Pencil, Trash2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { difficultyBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
 
 const INITIAL_FORM = {
@@ -32,12 +33,6 @@ const INITIAL_FORM = {
   functionalRequirements: '',
   nonFunctionalRequirements: '',
   capacityEstimations: '',
-};
-
-const difficultyBadgeClassName = {
-  EASY: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
-  MEDIUM: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-  HARD: 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
 };
 
 const prettyJson = (value, emptyMessage) => {

@@ -22,63 +22,13 @@ import {
   SendHorizonal,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { getDifficultyBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
-
-const getDifficultyClassName = (difficulty) => {
-  switch (difficulty) {
-    case 'EASY':
-      return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300';
-    case 'MEDIUM':
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
-    case 'HARD':
-      return 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300';
-    default:
-      return '';
-  }
-};
-
-const parseElements = (value) => {
-  if (!value || typeof value !== 'string') {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-};
-
-const parseJsonArray = (value) => {
-  if (!value || typeof value !== 'string') {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-const formatJsonObject = (value, emptyText) => {
-  if (!value || typeof value !== 'string') {
-    return emptyText;
-  }
-
-  try {
-    const parsed = JSON.parse(value);
-    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-      return JSON.stringify(parsed, null, 2);
-    }
-
-    return emptyText;
-  } catch {
-    return value;
-  }
-};
+import {
+  formatJsonObject,
+  parseElementsOrNull,
+  parseJsonArray,
+} from '@/lib/scenarioFormatters';
 
 const Workspace = () => {
   const { scenarioId } = useParams();
@@ -140,13 +90,13 @@ const Workspace = () => {
         setDesignId(loadedDraft?.id ?? null);
 
         const localDraft = draftStorageKey ? localStorage.getItem(draftStorageKey) : null;
-        const localElements = parseElements(localDraft);
+        const localElements = parseElementsOrNull(localDraft);
 
         if (localDraft && !localElements && draftStorageKey) {
           localStorage.removeItem(draftStorageKey);
         }
 
-        const cloudElements = parseElements(loadedDraft?.diagram_data);
+        const cloudElements = parseElementsOrNull(loadedDraft?.diagram_data);
         const preferredElements = localElements ?? cloudElements ?? [];
         latestElementsRef.current = preferredElements;
         setInitialData({ elements: preferredElements });
@@ -365,7 +315,7 @@ const Workspace = () => {
                 <div className="mt-4 space-y-4 overflow-y-auto">
                   <div>
                     <p className="mb-1 text-sm font-medium">Difficulty</p>
-                    <Badge className={getDifficultyClassName(scenario.difficulty)}>
+                    <Badge className={getDifficultyBadgeClassName(scenario.difficulty)}>
                       {scenario.difficulty}
                     </Badge>
                   </div>
@@ -471,7 +421,7 @@ const Workspace = () => {
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-          <Badge className={getDifficultyClassName(scenario.difficulty)}>
+          <Badge className={getDifficultyBadgeClassName(scenario.difficulty)}>
             {scenario.difficulty}
           </Badge>
           {syncStatus && (

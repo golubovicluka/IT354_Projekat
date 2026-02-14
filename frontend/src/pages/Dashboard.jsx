@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ClipboardCheck, Info, LogOut, MessageSquare, Pencil, Play, Send, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { getDifficultyBadgeClassName, getDesignStatusBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
+import { parseJsonArray, parseJsonObject } from '@/lib/scenarioFormatters';
 
 const Dashboard = () => {
     const [scenarios, setScenarios] = useState([]);
@@ -70,60 +72,6 @@ const Dashboard = () => {
     const handleLogout = () => {
         logout();
         navigate('/login');
-    };
-
-    const getDifficultyClassName = (difficulty) => {
-        switch (difficulty) {
-            case 'EASY':
-                return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300';
-            case 'MEDIUM':
-                return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
-            case 'HARD':
-                return 'bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300';
-            default:
-                return '';
-        }
-    };
-
-    const getDesignStatusClassName = (status) => {
-        switch (status) {
-            case 'DRAFT':
-                return 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-300';
-            case 'SUBMITTED':
-                return 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
-            case 'GRADED':
-                return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300';
-            default:
-                return '';
-        }
-    };
-
-    const parseJsonArray = (value) => {
-        if (!value || typeof value !== 'string') {
-            return [];
-        }
-
-        try {
-            const parsed = JSON.parse(value);
-            return Array.isArray(parsed) ? parsed : [];
-        } catch {
-            return [];
-        }
-    };
-
-    const parseJsonObject = (value) => {
-        if (!value || typeof value !== 'string') {
-            return null;
-        }
-
-        try {
-            const parsed = JSON.parse(value);
-            return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
-                ? parsed
-                : null;
-        } catch {
-            return null;
-        }
     };
 
     if (loading) {
@@ -204,11 +152,11 @@ const Dashboard = () => {
                                 <div className="flex items-start justify-between gap-2">
                                     <CardTitle>{scenario.title}</CardTitle>
                                     <div className="flex items-center gap-2">
-                                        <Badge className={getDifficultyClassName(scenario.difficulty)}>
+                                        <Badge className={getDifficultyBadgeClassName(scenario.difficulty)}>
                                             {scenario.difficulty}
                                         </Badge>
                                         {existingStatus && (
-                                            <Badge className={getDesignStatusClassName(existingStatus)}>
+                                            <Badge className={getDesignStatusBadgeClassName(existingStatus)}>
                                                 {existingStatus}
                                             </Badge>
                                         )}
