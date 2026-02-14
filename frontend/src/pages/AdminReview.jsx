@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { FileText, LogOut, Save, Settings } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import useAuth from '@/context/useAuth';
 import { difficultyBadgeClassName, designStatusBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
 import {

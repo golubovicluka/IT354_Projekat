@@ -13,7 +13,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { ArrowLeft, FileText, LogOut } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import useAuth from '@/context/useAuth';
 import { difficultyBadgeClassName, designStatusBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
 import {

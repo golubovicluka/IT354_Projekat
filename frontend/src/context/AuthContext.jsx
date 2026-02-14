@@ -1,58 +1,90 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import api from '../lib/api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import AuthContext from './auth-context';
+import api, { setUnauthorizedHandler } from '@/lib/api';
+import {
+    clearStoredAuth,
+    getStoredToken,
+    getStoredUser,
+    setStoredAuth,
+} from '@/lib/authStorage';
 
-const AuthContext = createContext(null);
+const getInitialAuthState = () => {
+    const token = getStoredToken();
+    const user = token ? getStoredUser() : null;
+
+    if (token && !user) {
+        clearStoredAuth();
+        return { token: null, user: null };
+    }
+
+    return { token, user };
+};
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token'));
-    const [loading, setLoading] = useState(true);
+    const [authState, setAuthState] = useState(getInitialAuthState);
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser && token) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
-    }, [token]);
-
-    const login = async (email, password) => {
+    const login = useCallback(async (email, password) => {
         const response = await api.post('/auth/login', { email, password });
-        const { token: newToken, user: userData } = response.data;
+        const { token: newToken, user: userData } = response.data || {};
+        if (!newToken || !userData) {
+            throw new Error('Invalid authentication response.');
+        }
 
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('user', JSON.stringify(userData));
-        setToken(newToken);
-        setUser(userData);
+        setStoredAuth({ token: newToken, user: userData });
+        setAuthState({ token: newToken, user: userData });
 
         return userData;
-    };
+    }, []);
 
-    const register = async (username, email, password) => {
+    const register = useCallback(async (username, email, password) => {
         const response = await api.post('/auth/register', { username, email, password });
         return response.data;
-    };
+    }, []);
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
-    };
+    const logout = useCallback(() => {
+        clearStoredAuth();
+        setAuthState((current) => {
+            if (!current.token && !current.user) {
+                return current;
+            }
 
-    const isAuthenticated = !!token && !!user;
+            return { token: null, user: null };
+        });
+    }, []);
+
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            setAuthState((current) => {
+                if (!current.token && !current.user) {
+                    return current;
+                }
+
+                return { token: null, user: null };
+            });
+        });
+
+        return () => {
+            setUnauthorizedHandler(null);
+        };
+    }, []);
+
+    const isAuthenticated = Boolean(authState.token && authState.user);
+    const contextValue = useMemo(
+        () => ({
+            user: authState.user,
+            token: authState.token,
+            login,
+            register,
+            logout,
+            isAuthenticated,
+            loading: false,
+        }),
+        [authState.token, authState.user, isAuthenticated, login, logout, register]
+    );
 
     return (
-        <AuthContext.Provider value={{ user, token, login, register, logout, isAuthenticated, loading }}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );
-};
-
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
 };

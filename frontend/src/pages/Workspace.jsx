@@ -21,7 +21,7 @@ import {
   Save,
   SendHorizonal,
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import useAuth from '@/context/useAuth';
 import { getDifficultyBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
 import {

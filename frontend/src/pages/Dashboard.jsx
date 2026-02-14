@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ClipboardCheck, Info, LogOut, MessageSquare, Pencil, Play, Send, Settings } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import useAuth from '@/context/useAuth';
 import { getDifficultyBadgeClassName, getDesignStatusBadgeClassName } from '@/lib/badgeStyles';
 import api from '@/lib/api';
 import { parseJsonArray, parseJsonObject } from '@/lib/scenarioFormatters';
