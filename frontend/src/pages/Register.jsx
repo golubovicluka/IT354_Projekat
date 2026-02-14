@@ -101,13 +101,21 @@ const Register = () => {
                         </Button>
                     </form>
 
-                    <div className="mt-6 text-center text-sm text-slate-600">
-                        <p>Already have an account?</p>
+                    <div className="mt-6 space-y-3 text-center text-sm text-slate-600">
+                        <div>
+                            <p>Already have an account?</p>
+                            <Link
+                                to="/login"
+                                className="font-medium text-slate-900 underline underline-offset-4 transition hover:text-slate-700"
+                            >
+                                Login
+                            </Link>
+                        </div>
                         <Link
-                            to="/login"
-                            className="font-medium text-slate-900 underline underline-offset-4 transition hover:text-slate-700"
+                            to="/"
+                            className="inline-block text-slate-500 transition hover:text-slate-700"
                         >
-                            Login
+                            ← Back to Home
                         </Link>
                     </div>
                 </CardContent>

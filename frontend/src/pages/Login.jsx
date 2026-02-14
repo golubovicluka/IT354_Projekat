@@ -83,13 +83,21 @@ const Login = () => {
                         </Button>
                     </form>
 
-                    <div className="mt-6 text-center text-sm text-slate-600">
-                        <p>Do not have an account yet?</p>
+                    <div className="mt-6 space-y-3 text-center text-sm text-slate-600">
+                        <div>
+                            <p>Do not have an account yet?</p>
+                            <Link
+                                to="/register"
+                                className="font-medium text-slate-900 underline underline-offset-4 transition hover:text-slate-700"
+                            >
+                                Create account
+                            </Link>
+                        </div>
                         <Link
-                            to="/register"
-                            className="font-medium text-slate-900 underline underline-offset-4 transition hover:text-slate-700"
+                            to="/"
+                            className="inline-block text-slate-500 transition hover:text-slate-700"
                         >
-                            Create account
+                            ← Back to Home
                         </Link>
                     </div>
                 </CardContent>
