@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { exportToBlob } from '@excalidraw/excalidraw';
 import ExcalidrawWrapper from '@/components/ExcalidrawWrapper';
+import ScenarioInfoPanel from '@/components/scenario/ScenarioInfoPanel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -309,58 +310,16 @@ const Workspace = () => {
                   <SheetDescription>Review problem details while designing.</SheetDescription>
                 </SheetHeader>
 
-                <div className="mt-4 space-y-4 overflow-y-auto">
-                  <div>
-                    <p className="mb-1 text-sm font-medium">Difficulty</p>
-                    <Badge className={getDifficultyBadgeClassName(scenario.difficulty)}>
-                      {scenario.difficulty}
-                    </Badge>
-                  </div>
-
-                  <div>
-                    <p className="mb-1 text-sm font-medium">Description</p>
-                    <p className="text-muted-foreground whitespace-pre-wrap text-sm">
-                      {scenario.description}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="mb-1 text-sm font-medium">Functional Requirements</p>
-                    {functionalRequirements.length > 0 ? (
-                      <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
-                        {functionalRequirements.map((requirement, index) => (
-                          <li key={`functional-${index}`}>{String(requirement)}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">
-                        No functional requirements provided.
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="mb-1 text-sm font-medium">Non-Functional Requirements</p>
-                    {nonFunctionalRequirements.length > 0 ? (
-                      <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
-                        {nonFunctionalRequirements.map((requirement, index) => (
-                          <li key={`non-functional-${index}`}>{String(requirement)}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">
-                        No non-functional requirements provided.
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="mb-1 text-sm font-medium">Capacity Estimations</p>
-                    <pre className="bg-muted max-h-[50vh] overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap break-words">
-                      {capacityEstimations}
-                    </pre>
-                  </div>
-                </div>
+                <ScenarioInfoPanel
+                  description={scenario.description}
+                  functionalRequirements={functionalRequirements}
+                  nonFunctionalRequirements={nonFunctionalRequirements}
+                  capacityEstimations={capacityEstimations}
+                  showDifficulty
+                  difficulty={scenario.difficulty}
+                  containerClassName="mt-4 overflow-y-auto"
+                  capacityClassName="max-h-[50vh]"
+                />
               </SheetContent>
             </Sheet>
 
