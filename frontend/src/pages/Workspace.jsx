@@ -6,6 +6,14 @@ import ScenarioInfoPanel from '@/components/scenario/ScenarioInfoPanel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -13,12 +21,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Textarea } from '@/components/ui/textarea';
 import {
   ArrowLeft,
   Eraser,
   FileText,
   ImageDown,
   LogOut,
+  MessageSquareText,
   Save,
   SendHorizonal,
 } from 'lucide-react';
@@ -45,6 +55,8 @@ const Workspace = () => {
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [explanationOpen, setExplanationOpen] = useState(false);
+  const [textExplanation, setTextExplanation] = useState('');
   const [isCanvasReady, setIsCanvasReady] = useState(false);
   const excalidrawAPIRef = useRef(null);
   const latestElementsRef = useRef([]);
@@ -87,6 +99,7 @@ const Workspace = () => {
 
         setScenario(scenarioData);
         setDesignId(draftData?.id ?? null);
+        setTextExplanation(draftData?.text_explanation || '');
 
         const localDraft = draftStorageKey ? localStorage.getItem(draftStorageKey) : null;
         const localElements = parseElementsOrNull(localDraft);
@@ -158,7 +171,7 @@ const Workspace = () => {
     latestElementsRef.current = elements;
 
     const diagramData = JSON.stringify(elements);
-    const payload = { diagramData, textExplanation: '' };
+    const payload = { diagramData, textExplanation };
 
     const savedDesign = designId
       ? await designService.update(designId, payload)
@@ -172,7 +185,7 @@ const Workspace = () => {
 
     setSyncStatus('Cloud synced.');
     return savedDesign;
-  }, [designId, draftStorageKey, parsedScenarioId]);
+  }, [designId, draftStorageKey, parsedScenarioId, textExplanation]);
 
   const handleSaveDraft = async () => {
     setSaving(true);
@@ -347,6 +360,42 @@ const Workspace = () => {
               <Eraser className="size-4" />
               Clear
             </Button>
+            <Dialog open={explanationOpen} onOpenChange={setExplanationOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={saving || submitting}
+                >
+                  <MessageSquareText className="size-4" />
+                  Comment
+                  {textExplanation.trim() && (
+                    <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-indigo-500" />
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Add a design comment</DialogTitle>
+                  <DialogDescription>
+                    Optionally describe your design choices, trade-offs, or any other context.
+                    This will be visible to reviewers.
+                  </DialogDescription>
+                </DialogHeader>
+                <Textarea
+                  value={textExplanation}
+                  onChange={(e) => setTextExplanation(e.target.value)}
+                  placeholder="e.g. I chose a message queue between the API gateway and notification service to decouple traffic spikes from delivery…"
+                  rows={8}
+                  className="resize-y"
+                />
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setExplanationOpen(false)}>
+                    Done
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button
               variant="outline"
               size="sm"
