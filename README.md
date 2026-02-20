@@ -1,6 +1,7 @@
 # Project description
 
 Architex is a web application that allows users (students or interview candidates) to design system architectures for various scenarios. Users can create designs, submit them for review, and receive feedback from admins (professors or interviewers).
+This is a project for IT354 - Web Systems I, for Uni.
 
 # Resources used:
 
